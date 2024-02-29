@@ -34,9 +34,9 @@ router.post('/change-password', userController.PasswordOtpVerify);
 router.post("/signup",userController.signup)
 router.get("/myprofile",userController.Myprofile)
 router.get("/get-all-user",userController.getAllUser)
-// router.put("/follow",userController.Follow)
-// router.put("/unfollow",userController.unFollow)
-// router.post("/search-user",userController.SearchUser)
+router.put("/follow",userController.Follow)
+router.put("/unfollow",userController.unFollow)
+router.post("/search-user",userController.SearchUser)
 
 
 module.exports = router

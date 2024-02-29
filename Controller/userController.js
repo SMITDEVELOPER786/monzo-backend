@@ -617,3 +617,150 @@ exports.getAllUser = async (req, res) => {
 //       res.status(500).json({ message: error.message });
 //   }
 // };
+
+exports.Follow = async (req, res) => {
+  try {
+    const { body, headers } = req;
+    const { authorization } = headers;
+    const token = authorization && authorization.split(" ")[1];
+
+    // Token ki validation
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: Missing Token" });
+    }
+
+    // Token ko verify karna
+    const decode = jwt.verify(token, secretkey);
+
+    // Token valid hai, decoded mein user ki information hogi
+    const { followerId } = body;
+    const userId = decode.userId;
+
+    // User profile ko retrieve karna
+    const user = await userSchema.findById(userId).populate('ProfileId');
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Follower profile ko retrieve karna
+    const follower = await userprofileSchema.findById(followerId);
+    if (!follower) {
+      return res.status(404).json({ message: "Follower not found" });
+    }
+
+    // Check karein ki user pehle se follow kar raha hai ya nahi
+    if (follower.followers.includes(userId)) {
+      return res.status(400).json({ message: "You are already following this user" });
+    }
+
+    // User profile aur follower profile ko update karna
+    const followerUpdate = await userprofileSchema.findByIdAndUpdate(
+      followerId,
+      { $push: { followers: userId } },
+      { new: true }
+    );
+
+    const userUpdate = await userprofileSchema.findByIdAndUpdate(
+      user.ProfileId._id,
+      { $push: { following: followerId } },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "You are now following this user", followerUpdate, userUpdate });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.unFollow = async (req, res) => {
+  try {
+    const { body, headers } = req;
+    const { authorization } = headers;
+    const token = authorization && authorization.split(" ")[1];
+
+    // Token ki validation
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: Missing Token" });
+    }
+
+    // Token ko verify karna
+    const decode = jwt.verify(token, secretkey);
+
+    // Token valid hai, decoded mein user ki information hogi
+    const { followerId } = body;
+    const userId = decode.userId;
+
+    // User profile ko retrieve karna
+    const user = await userSchema.findById(userId).populate('ProfileId');
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Follower profile ko retrieve karna
+    const follower = await userprofileSchema.findById(followerId);
+    if (!follower) {
+      return res.status(404).json({ message: "Follower not found" });
+    }
+
+    // Check karein ki user pehle se follow kar raha hai ya nahi
+    // if (follower.followers.includes(userId)) {
+    //   return res.status(400).json({ message: "You are already following this user" });
+    // }
+
+    // User profile aur follower profile ko update karna
+    const followerUpdate = await userprofileSchema.findByIdAndUpdate(
+      followerId,
+      { $pull: { followers: userId } },
+      { new: true }
+    );
+
+    const userUpdate = await userprofileSchema.findByIdAndUpdate(
+      user.ProfileId._id,
+      { $pull: { following: followerId } },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "You are now following this user", followerUpdate, userUpdate });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+//SearchUser
+exports.SearchUser = async (req, res) => {
+  try {
+    const searchTerm = req.body.name; // Assuming query parameter name is used
+
+console.log(searchTerm);
+    const data = await userprofileSchema.find({
+      "$or": [{
+        "username": {
+          "$regex": new RegExp(searchTerm, "i") // Case-insensitive search
+        }
+      }]
+    })
+
+    console.log(data)
+    return res.status(200).json({
+      data
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message
+    });
+  }
+}
