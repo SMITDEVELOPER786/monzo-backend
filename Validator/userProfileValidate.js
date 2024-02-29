@@ -26,19 +26,11 @@ const ProfileValidator = Joi.object({
         'string.empty': `favBroadcaster cannot be empty`,
         'any.required': `favBroadcaster is required`,
     }),
-<<<<<<< HEAD
-    // authId: Joi.string().required().messages({
-    //     'string.base': `authId must be a string`,
-    //     'string.empty': `authId cannot be empty`,
-    //     'any.required': `authId is required`,
-    // }),
-=======
     authId: Joi.string().required().messages({
         'string.base': `authId must be a string`,
         'string.empty': `authId cannot be empty`,
         'any.required': `authId is required`,
     }),
->>>>>>> main
 });
 
 module.exports = { ProfileValidator };
