@@ -1,7 +1,7 @@
 const exp = require("express")
 
 const router = exp.Router()
-const userController =require("../Controller/userController")
+const userController =require("../Controller/userController.js")
 const multer = require("multer")
 
 
@@ -25,18 +25,18 @@ router.post("/signup",userController.signup)
 router.post("/login",userController.login)
 router.get("/logout",userController.Logout)
 
-// router.post("/send-otp",userController.sendOtp)
+router.post("/send-otp",userController.sendOtp)
 
-router.post("/verify-otp",userController.verifyOtp)
+// router.post("/verify-otp",userController.verifyOtp)
 router.post("/completeprofile",upload.single("profileImage"),userController.completeProfile)
 router.post("/forgetpassword",userController.forgotPassword)
 router.post('/change-password', userController.PasswordOtpVerify);
 router.post("/signup",userController.signup)
 router.get("/myprofile",userController.Myprofile)
 router.get("/get-all-user",userController.getAllUser)
-router.put("/follow",userController.Follow)
-router.put("/unfollow",userController.unFollow)
-router.post("/search-user",userController.SearchUser)
+// router.put("/follow",userController.Follow)
+// router.put("/unfollow",userController.unFollow)
+// router.post("/search-user",userController.SearchUser)
 
 
 module.exports = router

@@ -1,6 +1,6 @@
 const exp = require("express")
 const router = exp.Router()
-const userRouter = require("./userRouter")
+const userRouter = require("./userRouter.js")
 
 
 router.use("/monzo",userRouter)
