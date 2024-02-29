@@ -33,8 +33,11 @@ required:true
         ref: 'users',
         required: true,
     },
+<<<<<<< HEAD
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'userprofiles' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'userprofiles' }]
+=======
+>>>>>>> main
 });
 
 module.exports = mongoose.model('userprofiles', userprofileSchema);

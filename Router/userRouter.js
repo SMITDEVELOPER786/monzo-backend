@@ -25,18 +25,28 @@ router.post("/signup",userController.signup)
 router.post("/login",userController.login)
 router.get("/logout",userController.Logout)
 
+<<<<<<< HEAD
 // router.post("/send-otp",userController.sendOtp)
 
 router.post("/verify-otp",userController.verifyOtp)
+=======
+router.post("/send-otp",userController.sendOtp)
+
+// router.post("/verify-otp",userController.verifyOtp)
+>>>>>>> main
 router.post("/completeprofile",upload.single("profileImage"),userController.completeProfile)
 router.post("/forgetpassword",userController.forgotPassword)
 router.post('/change-password', userController.PasswordOtpVerify);
 router.post("/signup",userController.signup)
 router.get("/myprofile",userController.Myprofile)
 router.get("/get-all-user",userController.getAllUser)
+<<<<<<< HEAD
 router.put("/follow",userController.Follow)
 router.put("/unfollow",userController.unFollow)
 router.post("/search-user",userController.SearchUser)
+=======
+
+>>>>>>> main
 
 
 module.exports = router
