@@ -43,8 +43,7 @@ app.use(bodyParser.json())
 app.use(mainRouter)
 
 
-
-app.listen(process.env.PORT || port,()=>{
+app.listen(process.env.PORT || 5000,()=>{
     console.log("port asssign",port)
 })
 
