@@ -1,13 +1,13 @@
 const exp = require("express");
-const userValidate = require("../Validator/userValid");
-const { ProfileValidator } = require("../Validator/userProfileValidate");
-const UserScheema = require("../Model/userSchema");
-const userprofileSchema = require("../Model/userprofileSchema");
+const userValidate = require("../Validator/userValid.js");
+const { ProfileValidator } = require("../Validator/userProfileValidate.js");
+const UserScheema = require("../Model/userSchema.js");
+const userprofileSchema = require("../Model/UserProfileSchema.js");
 const twilio = require('twilio');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { mail } = require("../Email/nodeMailer");
-const userSchema = require("../Model/userSchema");
+const { mail } = require("../Email/nodeMailer.js");
+const userSchema = require("../Model/userSchema.js");
 require("dotenv").config();
 const otpStorage = {};
 
@@ -40,7 +40,7 @@ exports.signup = async (req, res) => {
         message: "User AlReady Register",
       });
     } else {
-      const otp = Math.floor(Math.random() * 10000);
+      const otp = Math.floor(Math.random() * 1000000 + 1);
 
       console.log(otp);
       const hashpassword = await bcrypt.hash(password, 12);
@@ -104,33 +104,33 @@ exports.signup = async (req, res) => {
 
 
 
-// // Send OTP
-// exports.sendOtp = async (req, res) => {
-//   try {
-//     const { mobileNumber } = req.body;
-//     console.log(mobileNumber);
+// Send OTP
+exports.sendOtp = async (req, res) => {
+  try {
+    const { mobileNumber } = req.body;
+    console.log(mobileNumber);
 
-//     // Generate OTP
-//     const generateOTP = Math.floor(1000 + Math.random() * 9000);
-//     const otp = generateOTP;
+    // Generate OTP
+    const generateOTP = Math.floor(1000 + Math.random() * 9000);
+    const otp = generateOTP;
 
-//     // Send OTP using Twilio verify service
-//     client.verify.services(verifySid)
-//       .verifications
-//       .create({ to: `+92${mobileNumber}`, channel: "sms" })
-//       .then((verification) => {
-//         console.log(verification.status); // Log status of OTP verification
-//         res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//         res.status(500).json({ message: error.message });
-//       });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+    // Send OTP using Twilio verify service
+    client.verify.services(verifySid)
+      .verifications
+      .create({ to: `+92${mobileNumber}`, channel: "sms" })
+      .then((verification) => {
+        console.log(verification.status); // Log status of OTP verification
+        res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 
@@ -247,33 +247,33 @@ exports.signup = async (req, res) => {
 
 
 
-// // Send OTP
-// exports.sendOtp = async (req, res) => {
-//   try {
-//     const { mobileNumber } = req.body;
-//     console.log(mobileNumber);
+// Send OTP
+exports.sendOtp = async (req, res) => {
+  try {
+    const { mobileNumber } = req.body;
+    console.log(mobileNumber);
 
-//     // Generate OTP
-//     const generateOTP = Math.floor(1000 + Math.random() * 9000);
-//     const otp = generateOTP;
+    // Generate OTP
+    const generateOTP = Math.floor(1000 + Math.random() * 9000);
+    const otp = generateOTP;
 
-//     // Send OTP using Twilio verify service
-//     client.verify.v2.services(verifySid)
-//       .verifications
-//       .create({ to: `+92${mobileNumber}`, channel: "sms" })
-//       .then((verification) => {
-//         console.log(verification.status); // Log status of OTP verification
-//         res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//         res.status(500).json({ message: error.message });
-//       });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+    // Send OTP using Twilio verify service
+    client.verify.v2.services(verifySid)
+      .verifications
+      .create({ to: `+92${mobileNumber}`, channel: "sms" })
+      .then((verification) => {
+        console.log(verification.status); // Log status of OTP verification
+        res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 
@@ -281,65 +281,65 @@ exports.signup = async (req, res) => {
 
 
 // verifyOtp
-exports.verifyOtp = async (req, res) => {
-  try {
-    const { body, headers } = req;
-    const { authorization } = headers;
-    const { otp } = body;
-    const token = authorization && authorization.split(" ")[1];
+// exports.verifyOtp = async (req, res) => {
+//   try {
+//     const { body, headers } = req;
+//     const { authorization } = headers;
+//     const { otp } = body;
+//     const token = authorization && authorization.split(" ")[1];
 
-    if (!token) {
-      return res.status(401).json({
-        message: "token not provide",
-      });
-    } else {
-      if (otp == undefined) {
-        return res.status(401).json({
-          message: "otp not provide",
-        });
-      } else if (otp.length != 4) {
-        return res.status(401).json({
-          message: "Otp must be 4 letter",
-        });
-      } else {
-        console.log(token);
-        jwt.verify(token, secretkey, async (err, decode) => {
-          console.log(decode);
+//     if (!token) {
+//       return res.status(401).json({
+//         message: "token not provide",
+//       });
+//     } else {
+//       if (otp == undefined) {
+//         return res.status(401).json({
+//           message: "otp not provide",
+//         });
+//       } else if (otp.length != 6) {
+//         return res.status(401).json({
+//           message: "Otp must be 6 letter",
+//         });
+//       } else {
+//         console.log(token);
+//         jwt.verify(token, secretkey, async (err, decode) => {
+//           console.log(decode);
 
-          if (err) {
-            return res.status(401).json({
-              message: "unauthorization",
-              data: err.message,
-            });
-          }
-          console.log(decode);
-          req.userid = decode.userId;
-          var userFind = await UserScheema.findById(req.userid);
-          console.log(userFind);
-          if (userFind.otp == otp) {
-            await UserScheema.findByIdAndUpdate(req.userid, {
-              isVerify: true,
-             
-            });
+//           if (err) {
+//             return res.status(401).json({
+//               message: "unauthorization",
+//               data: err.message,
+//             });
+//           }
+//           // console.log(decode);
+//           req.userid = decode.userId;
+//           var userFind = await UserScheema.findById(req.userId);
+//           console.log(userFind);
+//           // if (userFind.otp == otp) {
+//           //   await UserScheema.findByIdAndUpdate(req.userid, {
+//           //     isVerify: true,
+//           //     // isVerify:
+//           //   });
 
-            return res.status(200).json({
-              message: "verify otp ",
-            });
-          } else {
-            return res.status(401).json({
-              message: "invalid otp",
-            });
-          }
-        });
-      }
-    }
-  } catch (error) {
-    return res.status(401).json({
-      message: "Internal Server",
-      data: error.message,
-    });
-  }
-};
+//           //   return res.status(200).json({
+//           //     message: "verify otp ",
+//           //   });
+//           // } else {
+//           //   return res.status(401).json({
+//           //     message: "invalid otp",
+//           //   });
+//           // }
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     return res.status(401).json({
+//       message: "Internal Server",
+//       data: error.message,
+//     });
+//   }
+// };
 
 
 
@@ -386,76 +386,52 @@ exports.login = async (req, res) => {
 
 // forgotPassword
 exports.forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (email) {
-      let checkUser = await userSchema.findOne({ email });
+  const { email } = req.body;
 
-      if (!checkUser) {
-        return res.status(401).json({ message: "Invalid Email Address" });
-      }
-
-      const otp = Math.floor(Math.random() * 10000);
-
-      checkUser.otp = otp;
-      await checkUser.save();
-
-      mail("Your OTP is", otp, email);
-
-      return res.status(200).json({ message: "OTP Sent Your Mail", otp });
-    } else {
-      return res.status(401).json({ message: "Enter Email Address" });
+  if (email) {
+    let ckeckUser = await userSchema.findOne({ email });
+    if (ckeckUser == null) {
+      return res.status(401).json({ message: "Invalid Email Address" });
     }
-  } catch (error) {
-    console.error("Error in forgotPassword:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+
+    const otp = Math.floor(Math.random() * 1000000 + 1);
+
+    mail("Your OTP is", otp, email);
+
+    return res.status(200).json({ message: "OTP Send Your Mail", otp });
+  } else {
+    return res.status(401).json({ message: "Enter Email Address" });
   }
 };
 
 
 // PasswordOtpVerify
 exports.PasswordOtpVerify = async (req, res) => {
-  try {
-    const { body, headers } = req;
-    const { authorization } = headers;
-    const { newPassword } = body;
-    const token = authorization && authorization.split(" ")[1];
+  const { email, otp, newPassword } = req.body;
 
-    if (!newPassword) {
-      return res.status(401).json({ message: "Enter new password" });
+  if (email && otp && newPassword) {
+    try {
+      const user = await userSchema.findOne({ email });
+
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      // hash password
+      const hashpassword = await bcrypt.hash(newPassword, 12);
+
+      // Update password field directly
+      user.password = hashpassword;
+      await user.save();
+
+      return res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Failed to update password" });
     }
-
-    // Token verify karna
-    jwt.verify(token, secretkey, async (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: "Unauthorized: Invalid Token" });
-      }
-      req.userid = decoded.userId;
-
-      if (req.userid) {
-      
-        var user = await UserScheema.findById(req.userid);
-
-     user.password = newPassword
-
-        // Hash password
-        const hashPassword = await bcrypt.hash(newPassword, 12);
-
-        // Update password field
-        user.password = hashPassword;
-        await user.save();
-
-        return res.json({ message: "Password updated successfully" });
-      } else {
-        return res.status(401).json({ message: "Unauthorized: Missing Email in Token" });
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+  } else {
+    return res.status(401).json({ message: "Enter all data" });
   }
 };
-
 
 
 
@@ -479,10 +455,7 @@ exports.completeProfile = async (req, res) => {
         });
       } else {
         req.userId = decode.userId;
-
-var userid = req.userId
-console.log(userid);    
-const user = await userSchema.findById(userid);
+        const user = await userSchema.findById(req.userId);
 
         if (user && user.isCompleteProfile === false) {
           await ProfileValidator.validateAsync(body);
@@ -495,14 +468,13 @@ const user = await userSchema.findById(userid);
             });
           }
 
-          console.log(req.userId);
           let obj = {
-            username:body.username,
-            dateOfBirth:body.dateOfBirth,
-            gender:body.gender,
-            profileImage:body.profileImage,
-            favBroadcaster:body.favBroadcaster,
-            authId:userid,
+            username: body.username,
+            dateOfBirth: body.dateOfBirth,
+            gender: body.gender,
+            profileImage: body.profileImage,
+            favBroadcaster: body.favBroadcaster,
+            authId: body.authId,
           };
 
           let userProfile = new userprofileSchema(obj);
@@ -510,7 +482,7 @@ const user = await userSchema.findById(userid);
 
           await userSchema.findByIdAndUpdate(req.userId, {
             isCompleteProfile: true,
-            ProfileId:userProfile._id, // assuming you want to link UserProfile to User
+            profileId: userProfile._id, // assuming you want to link UserProfile to User
           });
 
           return res.status(200).json({
@@ -583,7 +555,7 @@ exports.Myprofile = async (req, res) => {
                   console.error(error);
                   return res.status(500).json({ message: 'Failed to fetch user profile', err:error.message });
               }
-            }
+            }r
           }); 
 
     } else {
@@ -595,220 +567,53 @@ exports.Myprofile = async (req, res) => {
 
 exports.getAllUser = async (req, res) => {
 
-      try {
-           // Sabhi users ko retrieve karna
-            const users = await userSchema.find();
-        
-        //       // Profile ke saath users ko populate karna
-              const usersWithProfile = await userSchema.find().populate('ProfileId');
-        
-        //       // Response bhejna
-             res.status(200).json(usersWithProfile);
-         } catch (error) {
-              res.status(500).json({ message: error.message });
-          }
-  
-  
-  
-  
-  
-       };
-  
+  try {
+    const users = await userSchema.find();
+    res.status(200).json(users);
+} catch (error) {
+    res.status(500).json({ message: error.message });
+}
+
+
+  // try {
+  //       var user = await userprofileSchema.findById(req.authId)
+   
+  //       console.log(user);
+  //       if (user) {
+
+  //         var getUser = await userSchema.find({_id: { $ne: req.userId } }).populate("profileId")
+  //           return res.status(200).json({
+  //               message: 'user all users',
+  //               data: getUser
+  //           });
+  //       }
+
+
+  //   }
+  //   catch (e) {
+  //       console.error('Error:', e);
+  //       return res.status(500).json({
+  //           message: 'Internal server error',
+  //           error: e,
+  //       });
+  //   }
+
+}
 
 
 
-// Follow API
 
-// exports.Follow = async (req, res) => {
+
 //   try {
-//     const { body, headers } = req;
-//     const { authorization } = headers;
-//     const token = authorization && authorization.split(" ")[1];
-//     // Token ki validation
-//     if (!token) {
-//       return res.status(401).json({ message: "Unauthorized: Missing Token" });
-//     }
-//     // Token ko verify karna
-//     jwt.verify(token, secretkey, async (err, decode) => {
-//       if (err) {
-//         return res.status(401).json({ message: "Unauthorized: Invalid Token" });
-//       }
-//       // Token valid hai, decoded mein user ki information hogi
-//       const {followerId} = body
+//       // Sabhi users ko retrieve karna
+//       const users = await userSchema.find();
 
-//       const userId = decode.userId;
-//       console.log(userId);
-//       const follower = await userSchema.findById(followerId).populate('ProfileId')  ;
-//       const user = await userSchema.findById(userId).populate('ProfileId');
-// console.log(user)
-// console.log(follower.ProfileId.following) 
-//       if (!follower || !user) {
-//         return res.status(404).json({ message: "User not found" });
-//       }
-//       // Check if already following
-//       if (follower.ProfileId.following.includes(userId)) {
-//         return res.status(400).json({ message: "You are already following this user" });
-//       }
-//       // Update follower's following count
-//       follower.ProfileId.following.push(userId);
-//       follower.followingCount++;
-//       await follower.save();
-//       // Update user's followers count
-//       user.ProfileId.followers.push(followerId);
-//       user.ProfileId.followersCount++;
-//       await user.save();
-//       return res.status(200).json({ message: "You are now following this user" });
-//     });
+//       // Profile ke saath users ko populate karna
+//       const usersWithProfile = await userSchema.find().populate('profileId');
+
+//       // Response bhejna
+//       res.status(200).json(usersWithProfile);
 //   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ message: "Internal Server Error" });
+//       res.status(500).json({ message: error.message });
 //   }
 // };
-
-
-exports.Follow = async (req, res) => {
-  try {
-    const { body, headers } = req;
-    const { authorization } = headers;
-    const token = authorization && authorization.split(" ")[1];
-
-    // Token ki validation
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized: Missing Token" });
-    }
-
-    // Token ko verify karna
-    const decode = jwt.verify(token, secretkey);
-
-    // Token valid hai, decoded mein user ki information hogi
-    const { followerId } = body;
-    const userId = decode.userId;
-
-    // User profile ko retrieve karna
-    const user = await userSchema.findById(userId).populate('ProfileId');
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Follower profile ko retrieve karna
-    const follower = await userprofileSchema.findById(followerId);
-    if (!follower) {
-      return res.status(404).json({ message: "Follower not found" });
-    }
-
-    // Check karein ki user pehle se follow kar raha hai ya nahi
-    if (follower.followers.includes(userId)) {
-      return res.status(400).json({ message: "You are already following this user" });
-    }
-
-    // User profile aur follower profile ko update karna
-    const followerUpdate = await userprofileSchema.findByIdAndUpdate(
-      followerId,
-      { $push: { followers: userId } },
-      { new: true }
-    );
-
-    const userUpdate = await userprofileSchema.findByIdAndUpdate(
-      user.ProfileId._id,
-      { $push: { following: followerId } },
-      { new: true }
-    );
-
-    res.status(200).json({ message: "You are now following this user", followerUpdate, userUpdate });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-exports.unFollow = async (req, res) => {
-  try {
-    const { body, headers } = req;
-    const { authorization } = headers;
-    const token = authorization && authorization.split(" ")[1];
-
-    // Token ki validation
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized: Missing Token" });
-    }
-
-    // Token ko verify karna
-    const decode = jwt.verify(token, secretkey);
-
-    // Token valid hai, decoded mein user ki information hogi
-    const { followerId } = body;
-    const userId = decode.userId;
-
-    // User profile ko retrieve karna
-    const user = await userSchema.findById(userId).populate('ProfileId');
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Follower profile ko retrieve karna
-    const follower = await userprofileSchema.findById(followerId);
-    if (!follower) {
-      return res.status(404).json({ message: "Follower not found" });
-    }
-
-    // Check karein ki user pehle se follow kar raha hai ya nahi
-    // if (follower.followers.includes(userId)) {
-    //   return res.status(400).json({ message: "You are already following this user" });
-    // }
-
-    // User profile aur follower profile ko update karna
-    const followerUpdate = await userprofileSchema.findByIdAndUpdate(
-      followerId,
-      { $pull: { followers: userId } },
-      { new: true }
-    );
-
-    const userUpdate = await userprofileSchema.findByIdAndUpdate(
-      user.ProfileId._id,
-      { $pull: { following: followerId } },
-      { new: true }
-    );
-
-    res.status(200).json({ message: "You are now following this user", followerUpdate, userUpdate });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-
-
-
-
-
-
-
-
-
-//SearchUser
-exports.SearchUser = async (req, res) => {
-  try {
-    const searchTerm = req.body.name; // Assuming query parameter name is used
-
-console.log(searchTerm);
-    const data = await userprofileSchema.find({
-      "$or": [{
-        "username": {
-          "$regex": new RegExp(searchTerm, "i") // Case-insensitive search
-        }
-      }]
-    })
-
-    console.log(data)
-    return res.status(200).json({
-      data
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Server error",
-      error: error.message
-    });
-  }
-}
