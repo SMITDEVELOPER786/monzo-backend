@@ -1,13 +1,13 @@
 const exp = require("express");
-const userValidate = require("../Validator/userValid");
-const { ProfileValidator } = require("../Validator/userProfileValidate");
-const UserScheema = require("../Model/userSchema");
-const userprofileSchema = require("../Model/userprofileSchema");
+const userValidate = require("../Validator/userValid.js");
+const { ProfileValidator } = require("../Validator/userProfileValidate.js");
+const UserScheema = require("../Model/userSchema.js");
+const userprofileSchema = require("../Model/userprofileSchema.js");
 const twilio = require('twilio');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { mail } = require("../Email/nodeMailer");
-const userSchema = require("../Model/userSchema");
+const { mail } = require("../Email/nodeMailer.js");
+const userSchema = require("../Model/userSchema.js");
 require("dotenv").config();
 const otpStorage = {};
 
