@@ -74,7 +74,7 @@ const io = new Server(server, {
 // app.post('/socket', (req, res) => {
 
 io.on('connection', (socket) => {
-    // console.log("socketId", socket.id);
+    console.log("socketId", socket.id);
     // console.log("user", req.user);
     console.log('User connected:', socket.id);
 
@@ -116,7 +116,8 @@ io.on('connection', (socket) => {
 
 });
 
-server.listen(4000, () => {
-    console.log('Chat App Server listening on port 4000');
+const chatPort = 4000
+server.listen(chatPort, () => {
+    console.log('Chat App Server listening on port ', chatPort);
 });
 
