@@ -3,7 +3,7 @@ const router = exp.Router()
 const messageController = require("../Controller/messageController.js")
 
 
-router.route("/").get(messageController.getMessages)
+router.route("/chat").get(messageController.getMessages)
 
 
 

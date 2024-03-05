@@ -1,5 +1,5 @@
 const exp = require("express")
-
+const messageController = require("../Controller/messageController.js")
 const router = exp.Router()
 const userController =require("../Controller/userController.js")
 const multer = require("multer")
@@ -37,6 +37,7 @@ router.get("/get-all-user",userController.getAllUser)
 router.put("/follow",userController.Follow)
 router.put("/unfollow",userController.unFollow)
 router.post("/search-user",userController.SearchUser)
-
+router.get("/chat",messageController.getMessages)
+router.put("/edit-profile",upload.single("profileImage"),userController.editprofile)
 
 module.exports = router

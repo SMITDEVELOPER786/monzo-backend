@@ -5,7 +5,7 @@ const messageRouter = require("./messageRouter.js")
 
 
 router.use("/monzo", userRouter)
-router.use("/message", messageRouter)
+// router.use("/message", messageRouter)
 
 
 
