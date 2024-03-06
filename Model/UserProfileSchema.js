@@ -28,6 +28,16 @@ favBroadcaster:{
 type: String,
 required:true
 },
+bio:{
+    type:String,
+    required:false,
+ },
+diamonds:{
+ type:Number,
+ required: true,
+ default:0
+
+},
     authId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users',

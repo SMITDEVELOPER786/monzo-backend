@@ -455,6 +455,7 @@ exports.completeProfile = async (req, res) => {
         });
       } else {
         req.userId = decode.userId;
+        console.log(req.userid);
         const user = await userSchema.findById(req.userId);
 
         if (user && user.isCompleteProfile === false) {
@@ -469,12 +470,12 @@ exports.completeProfile = async (req, res) => {
           }
 
           let obj = {
-            username: body.username,
-            dateOfBirth: body.dateOfBirth,
-            gender: body.gender,
-            profileImage: body.profileImage,
-            favBroadcaster: body.favBroadcaster,
-            authId: body.authId,
+            username:body.username,
+            dateOfBirth:body.dateOfBirth,
+            gender:body.gender,
+            profileImage:body.profileImage,
+            favBroadcaster:body.favBroadcaster,
+            authId:req.userId,
           };
 
           let userProfile = new userprofileSchema(obj);
@@ -515,13 +516,7 @@ exports.Logout = async (req, res) => {
     return res.status(401).json({ message: "No token provided" });
   }
 
-  // Add token to blacklist or mark it as invalid on the server-side
-  // You might want to store the token in a blacklist in the database
-  // Alternatively, you can simply ignore the token as it's stateless
 
-  // Clear token from client-side (e.g., clear from local storage)
-  // Assuming you're using a browser-based client with local storage
-  // localStorage.removeItem('token');
 
   res.json({ message: "Logged out successfully" });
 };
@@ -674,6 +669,9 @@ exports.Follow = async (req, res) => {
   }
 };
 
+
+
+
 exports.unFollow = async (req, res) => {
   try {
     const { body, headers } = req;
@@ -732,13 +730,6 @@ exports.unFollow = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
 //SearchUser
 exports.SearchUser = async (req, res) => {
   try {
@@ -764,3 +755,69 @@ console.log(searchTerm);
     });
   }
 }
+
+
+
+
+
+exports.editprofile = async (req, res) => {
+  const { body, headers } = req;
+  const { authorization } = headers;
+
+  try {
+    const token = authorization && authorization.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({
+        message: "Token not provided",
+      });
+    }
+
+    jwt.verify(token, secretkey, async (err, decode) => {
+      if (err) {
+        return res.status(401).json({
+          message: "Unauthorized",
+        });
+      } else {
+        req.userId = decode.userId;
+        console.log(req.userId);
+
+        const user = await userSchema.findById(req.userId);
+
+        if (user && user.isCompleteProfile === true) { // Check if user's profile is already complete
+          if (req.file) {
+            body.profileImage = req.file.path;
+          }
+
+          let updateFields = {
+            username: body.username || user.username,
+            dateOfBirth: body.dateOfBirth || user.dateOfBirth,
+            gender: body.gender || user.gender,
+            favBroadcaster: body.favBroadcaster || user.favBroadcaster,
+            profileImage:body.profileImage || user.profileImage,
+            bio: body.bio || user.bio
+                      };
+
+          if (req.file) {
+            updateFields.profileImage = body.profileImage;
+          }
+
+          await userprofileSchema.findOneAndUpdate({ authId: req.userId }, updateFields);
+
+          return res.status(200).json({
+            message: "Profile updated",
+            data:updateFields
+          });
+        } else {
+          return res.status(400).json({
+            message: "Profile is not completed yet",
+          });
+        }
+      }
+    });
+  } catch (e) {
+    return res.status(500).json({
+      message: "Server error",
+      error: e,
+    });
+  }
+};

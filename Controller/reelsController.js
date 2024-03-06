@@ -70,10 +70,10 @@ exports.likeReel = async (req, res) => {
             if (reel) {
                 // console.log("checkReel", reel)
                 // Assuming req.user contains the ID of the user liking the reel
-                const likeId = req.body.likeId;
-                console.log(likeId)
+                // const likeId = req.body.use/rId;
+                console.log(req.body.userId)
                 // Add the user's ID to the like array
-                reel.like.push(likeId);
+                reel.like.push(req.body.userId);
                 await reel.save(); // Save the updated reel document
 
                 return res.status(200).json({
@@ -122,6 +122,167 @@ exports.dislikeReel = async (req, res) => {
                 status: true
             });
         }
+    } catch (err) {
+        return res.status(500).json({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+exports.addComment = async (req, res) => {
+    try {
+        if (!req.body.reelId || !req.body.userId || !req.body.comment) {
+            return res.status(400).json({
+                status: false,
+                message: "Both reelId and userId are required."
+            });
+        } else {
+            if (!req.body.reelId) return res.status(404).json({
+                status: false,
+                message: "reel id can't be null"
+            })
+            else {
+
+                const data = await reelsSchema.findById({ _id: req.body.reelId })
+                if (data) {
+                    console.log("data", data)
+                    data.comment.push({ userId: req.body.userId, comment: req.body.comment, reelId: req.body.reelId });
+                    await data.save(); // Save the updated reel document
+                    return res.status(200).json({
+                        data: data,
+                        status: true
+                    })
+                }
+            }
+        }
+    } catch (err) {
+        return res.status(500).json({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+exports.updateComment = async (req, res) => {
+    try {
+        if (!req.body.reelId || !req.body.userId || !req.body.comment) {
+            return res.status(400).json({
+                status: false,
+                message: "Both reelId and userId are required."
+            });
+        } else {
+            if (!req.body.reelId) return res.status(404).json({
+                status: false,
+                message: "reel id can't be null"
+            })
+            else {
+
+                const data = await reelsSchema.findById({ _id: req.body.reelId })
+                if (data) {
+                    console.log("data", data)
+                    const commentIndex = data.comment?.findIndex((comment) => comment.userId?.toString() === req.body.userId.toString());
+
+                    if (commentIndex === -1) {
+                        return res.status(404).json({
+                            status: false,
+                            message: "Comment not found."
+                        });
+                    }
+                    // Update the comment content
+                    data.comment[commentIndex].comment = req.body.comment;
+                    await data.save(); // Save the updated reel document
+                    return res.status(200).json({
+                        status: true,
+                        message: "Comment updated successfully.",
+                        data: data
+                    });
+                }
+            }
+        }
+    } catch (err) {
+        return res.status(500).json({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+exports.deleteComment = async (req, res) => {
+    try {
+        const { reelId, userId } = req.body;
+
+        if (!reelId || !userId) {
+            return res.status(400).json({
+                status: false,
+                message: "Both reelId and userId are required."
+            });
+        }
+
+        const reel = await reelsSchema.findById(reelId);
+
+        if (!reel) {
+            return res.status(404).json({
+                status: false,
+                message: "Reel not found."
+            });
+        }
+        console.log("userId", userId)
+        const commentIndex = reel.comment?.findIndex((comment) => comment.userId?.toString() === userId.toString());
+
+        // console.log("commentIndex", commentIndex)
+        if (commentIndex === -1) {
+            return res.status(404).json({
+                status: false,
+                message: "Comment not found."
+            });
+        }
+
+        reel.comment.splice(commentIndex, 1); // Remove the comment
+        await reel.save(); // Save the updated reel document
+
+        return res.status(200).json({
+            status: true,
+            message: "Comment deleted successfully."
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+exports.shareReel = async (req, res) => {
+    try {
+        if (!req.body.reelId || !req.body.userId) {
+            return res.status(400).json({
+                status: false,
+                message: "Both reelId and userId are required."
+            });
+        } else {
+            if (!req.body.reelId) return res.status(404).json({
+                status: false,
+                message: "reel id can't be null"
+            })
+            else {
+
+                const data = await reelsSchema.findById({ _id: req.body.reelId })
+                if (data) {
+                    console.log("req.body.userId", req.body.userId)
+                    data.share.push(req.body.userId);
+                    await data.save(); // Save the updated reel document
+                    return res.status(200).json({
+                        data: data,
+                        status: true,
+                        message: "reel shared successfully"
+                    })
+                }
+            }
+        }
+
+
     } catch (err) {
         return res.status(500).json({
             status: false,
