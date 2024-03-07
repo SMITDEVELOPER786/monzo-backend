@@ -2,6 +2,8 @@ const exp = require("express")
 const messageController = require("../Controller/messageController.js")
 const router = exp.Router()
 const userController =require("../Controller/userController.js")
+const reelRouter = require("./reelRouter.js")
+
 const multer = require("multer")
 
 
@@ -39,5 +41,7 @@ router.put("/unfollow",userController.unFollow)
 router.post("/search-user",userController.SearchUser)
 router.get("/chat",messageController.getMessages)
 router.put("/edit-profile",upload.single("profileImage"),userController.editprofile)
+router.use("/reel", reelRouter)
+
 
 module.exports = router
