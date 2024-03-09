@@ -24,13 +24,13 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ fileFilter: fileFilter }).single("video");
 
 
-router.route("/").get(reelsController.getReels)
-router.route("/upload").post(upload, reelsController.uploadReel)
+router.route("/get-reels").get(reelsController.getReels)
+router.route("/upload-reels").post(upload, reelsController.uploadReel)
 router.route("/like").post(reelsController.likeReel)
 router.route("/dislike").post(reelsController.dislikeReel)
 router.route("/comment").post(reelsController.addComment)
-router.route("/comment/update").post(reelsController.updateComment)
-router.route("/comment/delete").post(reelsController.deleteComment)
+router.route("/comment-update").post(reelsController.updateComment)
+router.route("/comment-delete").post(reelsController.deleteComment)
 router.route("/share").post(reelsController.shareReel)
 
 

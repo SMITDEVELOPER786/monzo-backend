@@ -1,31 +1,56 @@
 const exp = require("express");
 const userValidate = require("../Validator/userValid.js");
 const { ProfileValidator } = require("../Validator/userProfileValidate.js");
-const UserScheema = require("../Model/userSchema.js");
+const userScheema = require("../Model/userSchema.js");
 const userprofileSchema = require("../Model/UserProfileSchema.js");
-const twilio = require('twilio');
+const twilio = require("twilio");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { mail } = require("../Email/nodeMailer.js");
 const userSchema = require("../Model/userSchema.js");
+const Followers = require("../Model/Followers.js");
 require("dotenv").config();
 const otpStorage = {};
 
 const secretkey = process.env.secret_key;
 
+// const verifySid = "VA38f6ad426d933fd76c8567cb0d73071a";
+const accountSid = "AC22b19e84befb3f08053353e2b1421279";
+const authToken = "9ab34bcaf36b5664bb1f529a40e60e9c";
+const client = new twilio(accountSid, authToken);
 
+// youtube ka sendOtp
 
-const verifySid = "VA38f6ad426d933fd76c8567cb0d73071a";
-const accountSid = 'AC33c3e07866de234b343c795f1deb21c2';
-const authToken = 'be190548ecdaef53113393abd5d2f471';
-const client = twilio("AC22b19e84befb3f08053353e2b1421279", "5c0dd1b071a275f8ef6b98bbf130a6e7");
+exports.sendOtp = async (req, res) => {
+  const { mobileNumber } = req.body;
 
+  try {
+    //  Generate OTP
+    const generateOTP = Math.floor(1000 + Math.random() * 9000);
+    const otp = generateOTP;
 
+    // await UserScheema.findOneAndUpdate(
+    //   {mobileNumber},
+    //   {otp},
+    //   {upsert:true,new:true,setDefaultsOnInsert:true}
+    // )
 
+    await client.messages.create({
+      body: `your otp is ${otp}`,
+      to: mobileNumber,
+      from: "+12512437208",
+    });
 
-
-
-
+    return res.status(200).json({
+      otp: otp,
+      msg: "otp sent",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      e: error.message,
+    });
+  }
+};
 
 // Signup
 exports.signup = async (req, res) => {
@@ -34,13 +59,13 @@ exports.signup = async (req, res) => {
   try {
     await userValidate.validateAsync(req.body);
 
-    const checkemail = await UserScheema.findOne({ email });
+    const checkemail = await userScheema.findOne({ email });
     if (checkemail) {
       return res.status(401).json({
         message: "User AlReady Register",
       });
     } else {
-      const otp = Math.floor(Math.random() * 1000000 + 1);
+      const otp = Math.floor(Math.random() * 9000);
 
       console.log(otp);
       const hashpassword = await bcrypt.hash(password, 12);
@@ -49,7 +74,7 @@ exports.signup = async (req, res) => {
 
       req.body.otp = otp;
 
-      const user = UserScheema(req.body);
+      const user = userScheema(req.body);
 
       // const otp = Math.random(Math.floor*900000)
 
@@ -69,14 +94,11 @@ exports.signup = async (req, res) => {
     }
   } catch (e) {
     return res.status(400).json({
-      message: "Sahi Sy km kr user",
-      error: e,
+      message: "Internal Server error",
+      error: e.message,
     });
   }
 };
-
-
-
 
 // // Send OTP
 // exports.sendOtp = async (req, res) => {
@@ -101,184 +123,125 @@ exports.signup = async (req, res) => {
 //   }
 // };
 
-
-
-
 // Send OTP
-exports.sendOtp = async (req, res) => {
-  try {
-    const { mobileNumber } = req.body;
-    console.log(mobileNumber);
+// exports.sendOtp = async (req, res) => {
+//   try {
+//     const { mobileNumber } = req.body;
+//     console.log(mobileNumber);
 
-    // Generate OTP
-    const generateOTP = Math.floor(1000 + Math.random() * 9000);
-    const otp = generateOTP;
+//     // Generate OTP
+//     const generateOTP = Math.floor(1000 + Math.random() * 9000);
+//     const otp = generateOTP;
 
-    // Send OTP using Twilio verify service
-    client.verify.services(verifySid)
-      .verifications
-      .create({ to: `+92${mobileNumber}`, channel: "sms" })
-      .then((verification) => {
-        console.log(verification.status); // Log status of OTP verification
-        res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
-      })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).json({ message: error.message });
-      });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-
-
-
-// verifyOtp
-// exports.verifyOtp = async (req, res) => {
-
-//     const { body, headers } = req;
-//         const { authorization } = headers;
-        
-//         const token = authorization && authorization.split(" ")[1];
-    
-
-
-//     try {
-//         const { mobileNumber, otp } = req.body;
-
-//         if (otp === otps[mobileNumber]) {
-//             res.status(200).json({ message: 'OTP verified successfully' });
-//         } 
-//         else if (!token){
-//             return res.status(401).json({
-//             message: "token not provide",
-//             });
-//         }
-//         else if (otp == undefined){
-//             return res.status(401).json({
-//              message: "otp not provide",
-//             });
-//         }
-        
-//         else if (otp != 4 ){
-//             return res.status(401).json({
-//             message: "Otp must be 4 letter",
-//             });
-//         }
-        
-        
-        
-        
-        
-        
-        
-        
-//         else {
-//             res.status(400).json({ message: 'Invalid OTP' });
-//         }
-//     } catch (error) {
+//     // Send OTP using Twilio verify service
+//     client.verify.services(verifySid)
+//       .verifications
+//       .create({ to: `+92${mobileNumber}`, channel: "sms" })
+//       .then((verification) => {
+//         console.log(verification.status); // Log status of OTP verification
+//         res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
+//       })
+//       .catch((error) => {
 //         console.error(error);
-//         res.status(500).json({ message: 'Internal Server Error' });
-//     }
-
-
-// //   try {
-// //     const { body, headers } = req;
-// //     const { authorization } = headers;
-// //     const { otp } = body;
-// //     const token = authorization && authorization.split(" ")[1];
-
-// //     if (!token) {
-// //       return res.status(401).json({
-// //         message: "token not provide",
-// //       });
-// //     } else {
-// //       if (otp == undefined) {
-// //         return res.status(401).json({
-// //           message: "otp not provide",
-// //         });
-// //       } else if (otp.length != 6) {
-// //         return res.status(401).json({
-// //           message: "Otp must be 6 letter",
-// //         });
-// //       } else {
-// //         console.log(token);
-// //         jwt.verify(token, secretkey, async (err, decode) => {
-// //           console.log(decode);
-
-// //           if (err) {
-// //             return res.status(401).json({
-// //               message: "unauthorization",
-// //               data: err.message,
-// //             });
-// //           }
-// //           console.log(decode);
-// //           req.userid = decode.user_id;
-// //           var userFind = await UserScheema.findById(req.userid);
-// //           console.log(userFind);
-// //           if (userFind.otp == otp) {
-// //             await UserScheema.findByIdAndUpdate(req.userid, {
-// //               isVerify: true,
-// //               // isVerify:
-// //             });
-
-// //             return res.status(200).json({
-// //               message: "verify otp ",
-// //             });
-// //           } else {
-// //             return res.status(401).json({
-// //               message: "invalid otp",
-// //             });
-// //           }
-// //         });
-// //       }
-// //     }
-// //   } catch (error) {
-// //     return res.status(401).json({
-// //       message: "Internal Server",
-// //       data: error.message,
-// //     });
-// //   }
+//         res.status(500).json({ message: error.message });
+//       });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
 // };
 
+// verifyOtp
+exports.verifyOtp = async (req, res) => {
 
+  
 
-
-// Send OTP
-exports.sendOtp = async (req, res) => {
   try {
-    const { mobileNumber } = req.body;
-    console.log(mobileNumber);
+    const { body, headers } = req;
+    const { authorization } = headers;
+    const { otp } = body;
+    const token = authorization && authorization.split(" ")[1];
 
-    // Generate OTP
-    const generateOTP = Math.floor(1000 + Math.random() * 9000);
-    const otp = generateOTP;
-
-    // Send OTP using Twilio verify service
-    client.verify.v2.services(verifySid)
-      .verifications
-      .create({ to: `+92${mobileNumber}`, channel: "sms" })
-      .then((verification) => {
-        console.log(verification.status); // Log status of OTP verification
-        res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
-      })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).json({ message: error.message });
+    if (!token) {
+      return res.status(401).json({
+        message: "token not provide",
       });
+    } else {
+      if (otp == undefined) {
+        return res.status(401).json({
+          message: "otp not provide",
+        });
+      } else if (otp.length != 4) {
+        return res.status(401).json({
+          message: "Otp must be 4 letter",
+        });
+      } else {
+        console.log(token);
+        jwt.verify(token, secretkey, async (err, decode) => {
+          console.log(decode);
+
+          if (err) {
+            return res.status(401).json({
+              message: "unauthorization",
+              data: err.message,
+            });
+          }
+          console.log(decode);
+          req.userid = decode.userId;
+          var userFind = await userScheema.findById(req.userid);
+          console.log(userFind);
+          if (userFind.otp == otp) {
+            await userScheema.findByIdAndUpdate(req.userid, {
+              isVerify: true,
+              // isVerify:
+            });
+
+            return res.status(200).json({
+              message: "verify otp ",
+            });
+          } else {
+            return res.status(401).json({
+              message: "invalid otp",
+            });
+          }
+        });
+      }
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    return res.status(401).json({
+      message: "Internal Server",
+      data: error.message,
+    });
   }
 };
 
+// Send OTP
+// exports.sendOtp = async (req, res) => {
+//   try {
+//     const { mobileNumber } = req.body;
+//     console.log(mobileNumber);
 
+//     // Generate OTP
+//     const generateOTP = Math.floor(1000 + Math.random() * 9000);
+//     const otp = generateOTP;
 
-
-
+//     // Send OTP using Twilio verify service
+//     client.verify.v2.services(verifySid)
+//       .verifications
+//       .create({ to: `+92${mobileNumber}`, channel: "sms" })
+//       .then((verification) => {
+//         console.log(verification.status); // Log status of OTP verification
+//         res.status(200).json({ otp: otp, message: 'OTP sent successfully' });
+//       })
+//       .catch((error) => {
+//         console.error(error);
+//         res.status(500).json({ message: error.message });
+//       });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 // verifyOtp
 // exports.verifyOtp = async (req, res) => {
@@ -341,15 +304,13 @@ exports.sendOtp = async (req, res) => {
 //   }
 // };
 
-
-
 // login
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const checkemail = await UserScheema.findOne({ email });
+    const checkemail = await userScheema.findOne({ email });
 
     if (checkemail) {
       let checkpassword = await bcrypt.compare(password, checkemail.password);
@@ -377,12 +338,11 @@ exports.login = async (req, res) => {
     }
   } catch (e) {
     return res.status(400).json({
-      message: "Sahi Sy km kr user",
+      message: "Server error",
       error: e.message,
     });
   }
 };
-
 
 // forgotPassword
 exports.forgotPassword = async (req, res) => {
@@ -394,7 +354,18 @@ exports.forgotPassword = async (req, res) => {
       return res.status(401).json({ message: "Invalid Email Address" });
     }
 
-    const otp = Math.floor(Math.random() * 1000000 + 1);
+console.log(ckeckUser)
+
+
+
+
+    const otp = Math.floor(Math.random() * 9000);
+
+ ckeckUser.otp =otp
+
+ await ckeckUser.save(); // Update karein
+
+
 
     mail("Your OTP is", otp, email);
 
@@ -404,14 +375,16 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-
 // PasswordOtpVerify
 exports.PasswordOtpVerify = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  const {  newPassword } = req.body;
 
-  if (email && otp && newPassword) {
+  const id = req.user._id;
+
+
+  if (newPassword) {
     try {
-      const user = await userSchema.findOne({ email });
+      const user = await userSchema.findOne({id});
 
       if (!user) {
         return res.status(401).json({ message: "User not found" });
@@ -433,28 +406,15 @@ exports.PasswordOtpVerify = async (req, res) => {
   }
 };
 
-
-
 // completeProfile
 exports.completeProfile = async (req, res) => {
-  const { body, headers } = req;
-  const { authorization } = headers;
+  const { body} = req;
+
 
   try {
-    const token = authorization && authorization.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({
-        message: "Token not provided",
-      });
-    }
 
-    jwt.verify(token, secretkey, async (err, decode) => {
-      if (err) {
-        return res.status(401).json({
-          message: "Unauthorized",
-        });
-      } else {
-        req.userId = decode.userId;
+
+        req.userId = req.user._id;
         console.log(req.userid);
         const user = await userSchema.findById(req.userId);
 
@@ -465,17 +425,17 @@ exports.completeProfile = async (req, res) => {
             body.profileImage = req.file.path;
           } else {
             return res.status(400).json({
-              message: "Profile image file not provided"
+              message: "Profile image file not provided",
             });
           }
 
           let obj = {
-            username:body.username,
-            dateOfBirth:body.dateOfBirth,
-            gender:body.gender,
-            profileImage:body.profileImage,
-            favBroadcaster:body.favBroadcaster,
-            authId:req.userId,
+            username: body.username,
+            dateOfBirth: body.dateOfBirth,
+            gender: body.gender,
+            profileImage: body.profileImage,
+            favBroadcaster: body.favBroadcaster,
+            authId: req.userId,
           };
 
           let userProfile = new userprofileSchema(obj);
@@ -488,15 +448,15 @@ exports.completeProfile = async (req, res) => {
 
           return res.status(200).json({
             message: "Profile updated",
-            data: userProfile // if you want to send updated profile data back
+            data: userProfile, // if you want to send updated profile data back
           });
         } else {
           return res.status(200).json({
-            message: "Profile already completed"
+            message: "Profile already completed",
           });
         }
-      }
-    });
+      
+  ;
   } catch (e) {
     return res.status(500).json({
       message: "Server error",
@@ -516,217 +476,189 @@ exports.Logout = async (req, res) => {
     return res.status(401).json({ message: "No token provided" });
   }
 
-
-
   res.json({ message: "Logged out successfully" });
 };
 
-
-
-
-
 exports.Myprofile = async (req, res) => {
-    const { body, headers } = req;
-    const { authorization } = headers;
-    const token = authorization && authorization.split(" ")[1];
   
-    if(token){
+        req.authId = req.user._id; // Assuming this is the correct key
+        var data = req.authId;
+        try {
+          var profileData = await userprofileSchema.findOne({ authId: req.authId });
+          var authData = await userScheema.findOne({ _id: req.authId });
 
-        jwt.verify(token, secretkey, async (err, decode) => {
-            if (err) {
-              return res.status(401).json({
-                message: "unauthorization",
-              });
-            } else {
-                console.log(decode);
-              req.authId = decode.userId; // Assuming this is the correct key
-              var data = req.authId
-              console.log(req.authId);
-              try {
-                  var user = await UserprofileScheema.findOne({ authId: req.authId });
-
-                  return res.status(200).json(user);
-              } catch (error) {
-                  console.error(error);
-                  return res.status(500).json({ message: 'Failed to fetch user profile', err:error.message });
-              }
-            }r
-          }); 
-
-    } else {
-        // Handle case when no token is provided
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
+          return res.status(200).json({profileData,authData});
+        } catch (error) {
+          console.error(error);
+          return res
+            .status(500)
+            .json({
+              message: "Failed to fetch user profile",
+              err: error.message,
+            });
+        }
+    
 };
-
 
 exports.getAllUser = async (req, res) => {
 
-  try {
-    const users = await userSchema.find();
-    res.status(200).json(users);
-} catch (error) {
-    res.status(500).json({ message: error.message });
-}
+try {
+  
+  var user = await userprofileSchema.find();
 
 
-  // try {
-  //       var user = await userprofileSchema.findById(req.authId)
-   
-  //       console.log(user);
-  //       if (user) {
+  
+    if (user) {
+      return res.status(200).json({
+        message: "user all users",
+        data: user
+      });
+    }
+  } catch (e) {
+    console.error("Error:", e);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: e.message,
+    });
+  }
 
-  //         var getUser = await userSchema.find({_id: { $ne: req.userId } }).populate("profileId")
-  //           return res.status(200).json({
-  //               message: 'user all users',
-  //               data: getUser
-  //           });
-  //       }
 
 
-  //   }
-  //   catch (e) {
-  //       console.error('Error:', e);
-  //       return res.status(500).json({
-  //           message: 'Internal server error',
-  //           error: e,
-  //       });
-  //   }
-
-}
+};
 
 
 
 
 
+
+
+
+
+
+
+// exports.Follow = async (req, res) => {
 //   try {
-//       // Sabhi users ko retrieve karna
-//       const users = await userSchema.find();
+//     const { body } = req;
+    
 
-//       // Profile ke saath users ko populate karna
-//       const usersWithProfile = await userSchema.find().populate('profileId');
+  
 
-//       // Response bhejna
-//       res.status(200).json(usersWithProfile);
+//     // Token valid hai, decoded mein user ki information hogi
+//     const { followerId } = body;
+//     const userId = req.user._id
+
+//     // User profile ko retrieve karna
+//     const user = await userSchema.findById(userId).populate("ProfileId");
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     // Follower profile ko retrieve karna
+//     const follower = await userprofileSchema.findById(followerId);
+//     if (!follower) {
+//       return res.status(404).json({ message: "Follower not found" });
+//     }
+
+//     // Check karein ki user pehle se follow kar raha hai ya nahi
+//     if (follower.followers.includes(userId)) {
+//       return res
+//         .status(400)
+//         .json({ message: "You are already following this user" });
+//     }
+
+//     // User profile aur follower profile ko update karna
+//     const followerUpdate = await userprofileSchema.findByIdAndUpdate(
+//       followerId,
+//       { $push: { followers: userId } },
+//       { new: true }
+//     );
+
+//     const userUpdate = await userprofileSchema.findByIdAndUpdate(
+//       user.ProfileId._id,
+//       { $push: { following: followerId } },
+//       { new: true }
+//     );
+
+//     res
+//       .status(200)
+//       .json({
+//         message: "You are now following this user",
+//         followerUpdate,
+//         userUpdate,
+//       });
 //   } catch (error) {
-//       res.status(500).json({ message: error.message });
+//     return res.status(500).json({ message: "Internal Server Error" ,e:error.message});
 //   }
 // };
 
-exports.Follow = async (req, res) => {
-  try {
-    const { body, headers } = req;
-    const { authorization } = headers;
-    const token = authorization && authorization.split(" ")[1];
+// exports.unFollow = async (req, res) => {
+//   try {
+//     const { body} = req;
 
-    // Token ki validation
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized: Missing Token" });
-    }
+ 
 
-    // Token ko verify karna
-    const decode = jwt.verify(token, secretkey);
+//     // Token ko verify karna
+    
 
-    // Token valid hai, decoded mein user ki information hogi
-    const { followerId } = body;
-    const userId = decode.userId;
+//     // Token valid hai, decoded mein user ki information hogi
+//     const { followerId } = body;
+//     const userId = req.user._id;
 
-    // User profile ko retrieve karna
-    const user = await userSchema.findById(userId).populate('ProfileId');
+//     // User profile ko retrieve karna
+//     const user = await userSchema.findById(userId).populate("ProfileId");
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
 
-    // Follower profile ko retrieve karna
-    const follower = await userprofileSchema.findById(followerId);
-    if (!follower) {
-      return res.status(404).json({ message: "Follower not found" });
-    }
+//     // Follower profile ko retrieve karna
+//     const follower = await userprofileSchema.findById(followerId);
+//     if (!follower) {
+//       return res.status(404).json({ message: "Follower not found" });
+//     }
 
-    // Check karein ki user pehle se follow kar raha hai ya nahi
-    if (follower.followers.includes(userId)) {
-      return res.status(400).json({ message: "You are already following this user" });
-    }
+//     if (follower.followers.includes(userId)) {
+//       return res
+//         .status(400)
+//         .json({ message: "You are already following this user" });
+//     }
 
-    // User profile aur follower profile ko update karna
-    const followerUpdate = await userprofileSchema.findByIdAndUpdate(
-      followerId,
-      { $push: { followers: userId } },
-      { new: true }
-    );
+//     // Check karein ki user pehle se follow kar raha hai ya nahi
+//     // if (follower.followers.includes(userId)) {
+//     //   return res.status(400).json({ message: "You are already following this user" });
+//     // }
 
-    const userUpdate = await userprofileSchema.findByIdAndUpdate(
-      user.ProfileId._id,
-      { $push: { following: followerId } },
-      { new: true }
-    );
+//     // User profile aur follower profile ko update karna
+//     const followerUpdate = await userprofileSchema.findByIdAndUpdate(
+//       followerId,
+//       { $pull: { followers: userId } },
+//       { new: true }
+//     );
 
-    res.status(200).json({ message: "You are now following this user", followerUpdate, userUpdate });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
+//     const userUpdate = await userprofileSchema.findByIdAndUpdate(
+//       user.ProfileId._id,
+//       { $pull: { following: followerId } },
+//       { new: true }
+//     );
+
+//     res
+//       .status(200)
+//       .json({
+//         message: "You are now unfollowing this user",
+//         followerUpdate,
+//         userUpdate,
+//       });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
 
 
 
 
-exports.unFollow = async (req, res) => {
-  try {
-    const { body, headers } = req;
-    const { authorization } = headers;
-    const token = authorization && authorization.split(" ")[1];
 
-    // Token ki validation
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized: Missing Token" });
-    }
-
-    // Token ko verify karna
-    const decode = jwt.verify(token, secretkey);
-
-    // Token valid hai, decoded mein user ki information hogi
-    const { followerId } = body;
-    const userId = decode.userId;
-
-    // User profile ko retrieve karna
-    const user = await userSchema.findById(userId).populate('ProfileId');
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Follower profile ko retrieve karna
-    const follower = await userprofileSchema.findById(followerId);
-    if (!follower) {
-      return res.status(404).json({ message: "Follower not found" });
-    }
-
-    // Check karein ki user pehle se follow kar raha hai ya nahi
-    // if (follower.followers.includes(userId)) {
-    //   return res.status(400).json({ message: "You are already following this user" });
-    // }
-
-    // User profile aur follower profile ko update karna
-    const followerUpdate = await userprofileSchema.findByIdAndUpdate(
-      followerId,
-      { $pull: { followers: userId } },
-      { new: true }
-    );
-
-    const userUpdate = await userprofileSchema.findByIdAndUpdate(
-      user.ProfileId._id,
-      { $pull: { following: followerId } },
-      { new: true }
-    );
-
-    res.status(200).json({ message: "You are now following this user", followerUpdate, userUpdate });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
 
 
 
@@ -735,55 +667,45 @@ exports.SearchUser = async (req, res) => {
   try {
     const searchTerm = req.body.name; // Assuming query parameter name is used
 
-console.log(searchTerm);
+    console.log(searchTerm);
     const data = await userprofileSchema.find({
-      "$or": [{
-        "username": {
-          "$regex": new RegExp(searchTerm, "i") // Case-insensitive search
-        }
-      }]
-    })
+      $or: [
+        {
+          username: {
+            $regex: new RegExp(searchTerm, "i"), // Case-insensitive search
+          },
+        },
+      ],
+    });
 
-    console.log(data)
+    console.log(data);
     return res.status(200).json({
-      data
+      data,
     });
   } catch (error) {
     return res.status(500).json({
       message: "Server error",
-      error: error.message
+      error: error.message,
     });
   }
-}
+};
 
-
-
-
-
+// Edit Profile
 exports.editprofile = async (req, res) => {
-  const { body, headers } = req;
-  const { authorization } = headers;
+  const { body} = req;
+
 
   try {
-    const token = authorization && authorization.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({
-        message: "Token not provided",
-      });
-    }
+ 
 
-    jwt.verify(token, secretkey, async (err, decode) => {
-      if (err) {
-        return res.status(401).json({
-          message: "Unauthorized",
-        });
-      } else {
-        req.userId = decode.userId;
+    
+        req.userId = req.user._id;
         console.log(req.userId);
 
         const user = await userSchema.findById(req.userId);
 
-        if (user && user.isCompleteProfile === true) { // Check if user's profile is already complete
+        if (user && user.isCompleteProfile === true) {
+          // Check if user's profile is already complete
           if (req.file) {
             body.profileImage = req.file.path;
           }
@@ -793,27 +715,30 @@ exports.editprofile = async (req, res) => {
             dateOfBirth: body.dateOfBirth || user.dateOfBirth,
             gender: body.gender || user.gender,
             favBroadcaster: body.favBroadcaster || user.favBroadcaster,
-            profileImage:body.profileImage || user.profileImage,
-            bio: body.bio || user.bio
-                      };
+            profileImage: body.profileImage || user.profileImage,
+            bio: body.bio || user.bio,
+          };
 
           if (req.file) {
             updateFields.profileImage = body.profileImage;
           }
 
-          await userprofileSchema.findOneAndUpdate({ authId: req.userId }, updateFields);
+          await userprofileSchema.findOneAndUpdate(
+            { authId: req.userId },
+            updateFields
+          );
 
           return res.status(200).json({
             message: "Profile updated",
-            data:updateFields
+            data: updateFields,
           });
         } else {
           return res.status(400).json({
             message: "Profile is not completed yet",
           });
         }
-      }
-    });
+      
+    ;
   } catch (e) {
     return res.status(500).json({
       message: "Server error",
@@ -821,3 +746,59 @@ exports.editprofile = async (req, res) => {
     });
   }
 };
+
+// Block User
+exports.blockUsers = async (req, res) => {
+  try {
+    await userprofileSchema.findByIdAndUpdate(
+      req.body.userId,
+      {
+        $set: {
+          isBlocked: true,
+        },
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "User Blocked Successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+// UnBlock User
+exports.unblockUsers = async (req, res) => {
+  console.log(req.body.userId, "..............");
+  try {
+    await userprofileSchema.findByIdAndUpdate(
+      req.body.userId,
+      {
+        $set: {
+          isBlocked: false,
+        },
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "User unBlocked Successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
