@@ -31,6 +31,8 @@ router.route("/dislike").post(reelsController.dislikeReel)
 router.route("/comment").post(reelsController.addComment)
 router.route("/comment-update").post(reelsController.updateComment)
 router.route("/comment-delete").post(reelsController.deleteComment)
+router.route("/comment/like").post(reelsController.likeComment)
+router.route("/comment/dislike").post(reelsController.dislikeComment)
 router.route("/share").post(reelsController.shareReel)
 
 

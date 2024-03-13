@@ -132,11 +132,17 @@ exports.dislikeReel = async (req, res) => {
 
 exports.addComment = async (req, res) => {
     try {
-        if (!req.body.reelId || !req.body.userId || !req.body.comment) {
+        if (!req.body.reelId || !req.body.userId) {
             return res.status(400).json({
                 status: false,
                 message: "Both reelId and userId are required."
             });
+        } else if (!req.body.comment) {
+            return res.status(400).json({
+                status: false,
+                message: "Comment are required."
+            });
+
         } else {
             if (!req.body.reelId) return res.status(404).json({
                 status: false,
@@ -288,5 +294,118 @@ exports.shareReel = async (req, res) => {
             status: false,
             message: err.message
         })
+    }
+}
+
+// -------------like/dislike Comment ---------------- 
+exports.likeComment = async (req, res) => {
+    try {
+        const { reelId, commentId, userId } = req.body;
+
+        // Check if all required parameters are provided
+        if (!reelId || !commentId || !userId) {
+            return res.status(400).json({
+                status: false,
+                message: "reelId, commentId, and userId are required."
+            });
+        }
+
+        // Find the reel by ID
+        const reel = await reelsSchema.findById(reelId);
+
+        // Check if the reel exists
+        if (!reel) {
+            return res.status(404).json({
+                status: false,
+                message: "Reel not found."
+            });
+        }
+
+        // Find the comment in the reel
+        const comment = reel.comment.find(comment => comment._id.toString() === commentId);
+
+        // Check if the comment exists
+        if (!comment) {
+            return res.status(404).json({
+                status: false,
+                message: "Comment not found."
+            });
+        }
+
+        // Check if the user has already liked the comment
+        const alreadyLikedIndex = comment.like.indexOf(userId);
+
+        // If the user has already liked the comment, return a message
+        if (alreadyLikedIndex !== -1) {
+            return res.status(200).json({
+                status: false,
+                message: "You have already liked this comment."
+            });
+        }
+
+        // Add the user's ID to the likes array of the comment
+        comment.like.push(userId);
+
+        // Save the updated reel
+        await reel.save();
+
+        return res.status(200).json({
+            status: true,
+            message: "Comment liked successfully.",
+            data: reel
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            status: false,
+            message: err.message
+        });
+    }
+}
+
+exports.dislikeComment = async (req, res) => {
+    try {
+        const { reelId, commentId, userId } = req.body
+        if (!reelId || !commentId || !userId) {
+            return res.status(400).json({
+                status: false,
+                message: "reelId, commentId, and userId are required."
+            });
+        }
+        const reel = await reelsSchema.findById(reelId);
+        if (!reel) {
+            return res.status(404).json({
+                status: false,
+                message: "Reel not found."
+            });
+        }
+        const comment = reel.comment.find(comment => comment._id.toString() === commentId);
+
+        if (!comment) {
+            return res.status(404).json({
+                status: false,
+                message: "Comment not found."
+            });
+        }
+
+        const alreadyDislikedIndex = comment.like.indexOf(userId);
+
+        // If the user has already disliked the comment, return a message
+        if (alreadyDislikedIndex !== -1) {
+            comment.like.splice(alreadyDislikedIndex, 1);
+            // Save the updated reel
+            await reel.save();
+            return res.status(200).json({
+                status: true,
+                message: "Comment disliked successfully.",
+                data: reel
+            });
+        }
+
+    } catch (err) {
+        return res.status(500).json({
+            status: false,
+            message: err.message
+        });
     }
 }

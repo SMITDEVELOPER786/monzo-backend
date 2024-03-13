@@ -4,7 +4,9 @@ const Schema = mongoose.Schema; // Import Schema from mongoose
 const commentSchema = new Schema({
     reelId: { type: Schema.Types.ObjectId, ref: "reels" },
     userId: { type: Schema.Types.ObjectId, ref: "users" },
-    comment: { type: String }
+    comment: { type: String },
+    like: [{ type: Schema.Types.ObjectId, ref: "users" }],
+
 })
 
 
