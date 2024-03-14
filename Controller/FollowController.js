@@ -72,7 +72,7 @@ const follow = async (req, res) => {
       res.status(200).json({
         status: true,
         message: "You are now following this user",
-        data: [],
+        data: followingData,
       });
     } else if (type === "follower") {
       const followerCheck = await Follower.findOne({
@@ -100,10 +100,10 @@ const follow = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     return res.status(500).json({
       message: "Internal Server Error",
-      e:error.message
+      e: error.message
     });
   }
 };

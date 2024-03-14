@@ -1,7 +1,7 @@
 const exp = require("express")
 const messageController = require("../Controller/messageController.js")
 const router = exp.Router()
-const userController =require("../Controller/userController.js")
+const userController = require("../Controller/userController.js")
 const multer = require("multer")
 const protect = require("../AuthMiddleware/protect.js")
 const reelRouter = require("./reelRouter.js")
@@ -25,28 +25,37 @@ const upload = multer({ storage: storage });
 
 router.post("/signup", userController.signup);
 router.post("/login", userController.login);
-router.get("/logout",userController.Logout);
+router.get("/logout", userController.Logout);
 
 router.post("/send-otp", userController.sendOtp);
 
+<<<<<<< HEAD
 router.post("/verify-otp",userController.verifyOtp)
 router.post("/completeprofile",upload.single("profileImage"),protect,userController.completeProfile)
 router.post("/forgetpassword",protect,userController.forgotPassword)
 router.post('/change-password',protect, userController.PasswordOtpVerify);
+=======
+router.post("/verify-otp", userController.verifyOtp)
+router.post("/completeprofile", upload.single("profileImage"), protect, userController.completeProfile)
+router.post("/forgetpassword", userController.forgotPassword)
+router.post('/change-password', protect, userController.PasswordOtpVerify);
+>>>>>>> 390fb3329d783afeaea8475dc96a8e2d3d5bc260
 
-router.post("/block-users",userController.blockUsers)
-router.post("/unblock-users",userController.unblockUsers)
+router.post("/block-users", userController.blockUsers)
+router.post("/unblock-users", userController.unblockUsers)
 
 
 
-router.get("/myprofile",protect,userController.Myprofile)
-router.get("/get-all-user",userController.getAllUser)
-router.post("/follow",protect,follow)
-router.post("/unfollow",protect,unfollow)
-router.get("/getfollowing",protect,getListFollowValidationRules)
-router.post("/search-user",userController.SearchUser)
-router.get("/chat",messageController.getMessages)
-router.put("/edit-profile",upload.single("profileImage"),protect,userController.editprofile)
+router.get("/myprofile", protect, userController.Myprofile)
+router.get("/get-all-user", userController.getAllUser)
+router.post("/follow", protect, follow)
+router.post("/unfollow", protect, unfollow)
+router.get("/getfollowing", protect, getListFollowValidationRules)
+router.post("/search-user", userController.SearchUser)
+router.get("/chat", messageController.getMessages)
+router.get("/get-followers", userController.getFollowersUsers)
+router.get("/get-broadcaster", userController.getAllBroadCasters)
+router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
 
 
 router.use("/reel", reelRouter)
