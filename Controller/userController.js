@@ -819,11 +819,11 @@ exports.getFollowersUsers = async (req, res) => {
     const data = await userSchema.aggregate([
       {
         $lookup: {
-          from: "followings",
-          // from: "followers",
+          // from: "followings",
+          from: "followers",
           localField: "_id",
-          foreignField: "following",
-          // foreignField: "follower",
+          // foreignField: "following",
+          foreignField: "follower",
           as: "followers"
         }
       },
@@ -867,11 +867,11 @@ exports.getAllBroadCasters = async (req, res) => {
     const data = await userSchema.aggregate([
       {
         $lookup: {
-          from: "followings",
-          // from: "followers",
+          // from: "followings",
+          from: "followers",
           localField: "_id",
-          foreignField: "following",
-          // foreignField: "follower",
+          // foreignField: "following",
+          foreignField: "follower",
           as: "followers"
         }
       },
