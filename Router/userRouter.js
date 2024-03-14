@@ -29,6 +29,10 @@ router.get("/logout", userController.Logout);
 
 router.post("/send-otp", userController.sendOtp);
 
+router.post("/verify-otp",userController.verifyOtp)
+router.post("/completeprofile",upload.single("profileImage"),protect,userController.completeProfile)
+router.post("/forgetpassword",protect,userController.forgotPassword)
+router.post('/change-password',protect, userController.PasswordOtpVerify);
 router.post("/verify-otp", userController.verifyOtp)
 router.post("/completeprofile", upload.single("profileImage"), protect, userController.completeProfile)
 router.post("/forgetpassword", userController.forgotPassword)
