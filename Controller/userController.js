@@ -363,12 +363,12 @@ exports.login = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   const id = req.user._id;
-
+console.log(id,'////////////////////////');
   if (email) {
  
     try {
-      const user = await userSchema.findOne({id});
-
+      const user = await userSchema.findOne({ _id: id.toString() });
+console.log(user,'.........................');
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
@@ -378,6 +378,10 @@ exports.forgotPassword = async (req, res) => {
       if (ckeckUser == null) {
         return res.status(401).json({ message: "Invalid Email Address" });
       }
+
+
+
+      
   
       const otp = Math.floor(Math.random() * 9000);
   
@@ -406,32 +410,7 @@ exports.forgotPassword = async (req, res) => {
 
 
 
-   
   
-  
-  
-  
-  
-  
-  
-  
-  
-    console.log(ckeckUser)
-
-
-
-
-    const otp = Math.floor(Math.random() * 9000);
-
-    ckeckUser.otp = otp
-
-    await ckeckUser.save(); // Update karein
-
-
-
-    mail("Your OTP is", otp, email);
-
-    return res.status(200).json({ message: "OTP Send Your Mail", otp });
   } else {
     return res.status(401).json({ message: "Enter Email Address" });
   }
@@ -441,7 +420,7 @@ exports.forgotPassword = async (req, res) => {
 exports.PasswordOtpVerify = async (req, res) => {
   const { newPassword } = req.body;
 
-  const id = req.user._id;
+  const id = req.user._id
 
 
   if (newPassword) {
@@ -449,7 +428,7 @@ exports.PasswordOtpVerify = async (req, res) => {
 
 
     try {
-      const user = await userSchema.findOne({ id });
+      const user = await userSchema.findOne({ _id: id.toString() });
 
       if (!user) {
         return res.status(401).json({ message: "User not found" });
