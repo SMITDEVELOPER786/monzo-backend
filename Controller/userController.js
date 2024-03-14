@@ -360,29 +360,60 @@ exports.login = async (req, res) => {
 // forgotPassword
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
+  const id = req.user._id;
 
   if (email) {
-    let ckeckUser = await userSchema.findOne({ email });
-    if (ckeckUser == null) {
-      return res.status(401).json({ message: "Invalid Email Address" });
+ 
+    try {
+      const user = await userSchema.findOne({id});
+
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+
+      let ckeckUser = await userSchema.findOne({ email });
+      if (ckeckUser == null) {
+        return res.status(401).json({ message: "Invalid Email Address" });
+      }
+  
+      const otp = Math.floor(Math.random() * 9000);
+  
+   ckeckUser.otp =otp
+  
+   await ckeckUser.save(); // Update karein
+  
+  
+  
+      mail("Your OTP is", otp, email);
+  
+      return res.status(200).json({ message: "OTP Send Your Mail", otp });
+    }
+    
+
+
+
+
+
+
+    
+     catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Failed to update password" });
     }
 
-console.log(ckeckUser)
 
 
-
-
-    const otp = Math.floor(Math.random() * 9000);
-
- ckeckUser.otp =otp
-
- await ckeckUser.save(); // Update karein
-
-
-
-    mail("Your OTP is", otp, email);
-
-    return res.status(200).json({ message: "OTP Send Your Mail", otp });
+   
+  
+  
+  
+  
+  
+  
+  
+  
+  
   } else {
     return res.status(401).json({ message: "Enter Email Address" });
   }
@@ -396,6 +427,9 @@ exports.PasswordOtpVerify = async (req, res) => {
 
 
   if (newPassword) {
+
+
+
     try {
       const user = await userSchema.findOne({id});
 
