@@ -313,7 +313,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const checkemail = await userScheema.findOne({ email });
-
+ 
     if (checkemail) {
       let checkpassword = await bcrypt.compare(password, checkemail.password);
 
@@ -321,13 +321,26 @@ exports.login = async (req, res) => {
         return res.status(400).json({
           message: "password incroect",
         });
-      } else {
+      } 
+      if (!checkemail.isVerify) {
+        return res.status(400).json({
+          message: "Account is not verified. Please verify your account.",
+        });
+
+      }
+        if (!checkemail.isCompleteProfile) {
+          return res.status(400).json({
+            message: "Please Complete Your Profile First.",
+          });
+      
+      }
+      else {
         const token = jwt.sign({ userId: checkemail._id }, secretkey, {
           expiresIn: "4h",
         });
 
         console.log(token);
-        return res.status(201).json({
+        return res.status(200).json({
           message: "login Successfully ",
           data: checkemail,
           token: token,
