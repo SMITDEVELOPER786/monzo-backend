@@ -8,6 +8,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { mail } = require("../Email/nodeMailer.js");
 const userSchema = require("../Model/userSchema.js");
+const reelsSchema = require('../Model/reelsSchema');
+
 const Followers = require("../Model/Followers.js");
 require("dotenv").config();
 const otpStorage = {};
@@ -154,7 +156,7 @@ exports.signup = async (req, res) => {
 // verifyOtp
 exports.verifyOtp = async (req, res) => {
 
-  
+
 
   try {
     const { body, headers } = req;
@@ -354,16 +356,16 @@ exports.forgotPassword = async (req, res) => {
       return res.status(401).json({ message: "Invalid Email Address" });
     }
 
-console.log(ckeckUser)
+    console.log(ckeckUser)
 
 
 
 
     const otp = Math.floor(Math.random() * 9000);
 
- ckeckUser.otp =otp
+    ckeckUser.otp = otp
 
- await ckeckUser.save(); // Update karein
+    await ckeckUser.save(); // Update karein
 
 
 
@@ -377,14 +379,14 @@ console.log(ckeckUser)
 
 // PasswordOtpVerify
 exports.PasswordOtpVerify = async (req, res) => {
-  const {  newPassword } = req.body;
+  const { newPassword } = req.body;
 
   const id = req.user._id;
 
 
   if (newPassword) {
     try {
-      const user = await userSchema.findOne({id});
+      const user = await userSchema.findOne({ id });
 
       if (!user) {
         return res.status(401).json({ message: "User not found" });
@@ -408,55 +410,55 @@ exports.PasswordOtpVerify = async (req, res) => {
 
 // completeProfile
 exports.completeProfile = async (req, res) => {
-  const { body} = req;
+  const { body } = req;
 
 
   try {
 
 
-        req.userId = req.user._id;
-        console.log(req.userid);
-        const user = await userSchema.findById(req.userId);
+    req.userId = req.user._id;
+    console.log(req.userid);
+    const user = await userSchema.findById(req.userId);
 
-        if (user && user.isCompleteProfile === false) {
-          await ProfileValidator.validateAsync(body);
+    if (user && user.isCompleteProfile === false) {
+      await ProfileValidator.validateAsync(body);
 
-          if (req.file) {
-            body.profileImage = req.file.path;
-          } else {
-            return res.status(400).json({
-              message: "Profile image file not provided",
-            });
-          }
+      if (req.file) {
+        body.profileImage = req.file.path;
+      } else {
+        return res.status(400).json({
+          message: "Profile image file not provided",
+        });
+      }
 
-          let obj = {
-            username: body.username,
-            dateOfBirth: body.dateOfBirth,
-            gender: body.gender,
-            profileImage: body.profileImage,
-            favBroadcaster: body.favBroadcaster,
-            authId: req.userId,
-          };
+      let obj = {
+        username: body.username,
+        dateOfBirth: body.dateOfBirth,
+        gender: body.gender,
+        profileImage: body.profileImage,
+        favBroadcaster: body.favBroadcaster,
+        authId: req.userId,
+      };
 
-          let userProfile = new userprofileSchema(obj);
-          await userProfile.save();
+      let userProfile = new userprofileSchema(obj);
+      await userProfile.save();
 
-          await userSchema.findByIdAndUpdate(req.userId, {
-            isCompleteProfile: true,
-            profileId: userProfile._id, // assuming you want to link UserProfile to User
-          });
+      await userSchema.findByIdAndUpdate(req.userId, {
+        isCompleteProfile: true,
+        profileId: userProfile._id, // assuming you want to link UserProfile to User
+      });
 
-          return res.status(200).json({
-            message: "Profile updated",
-            data: userProfile, // if you want to send updated profile data back
-          });
-        } else {
-          return res.status(200).json({
-            message: "Profile already completed",
-          });
-        }
-      
-  ;
+      return res.status(200).json({
+        message: "Profile updated",
+        data: userProfile, // if you want to send updated profile data back
+      });
+    } else {
+      return res.status(200).json({
+        message: "Profile already completed",
+      });
+    }
+
+    ;
   } catch (e) {
     return res.status(500).json({
       message: "Server error",
@@ -480,34 +482,34 @@ exports.Logout = async (req, res) => {
 };
 
 exports.Myprofile = async (req, res) => {
-  
-        req.authId = req.user._id; // Assuming this is the correct key
-        var data = req.authId;
-        try {
-          var profileData = await userprofileSchema.findOne({ authId: req.authId });
-          var authData = await userScheema.findOne({ _id: req.authId });
 
-          return res.status(200).json({profileData,authData});
-        } catch (error) {
-          console.error(error);
-          return res
-            .status(500)
-            .json({
-              message: "Failed to fetch user profile",
-              err: error.message,
-            });
-        }
-    
+  req.authId = req.user._id; // Assuming this is the correct key
+  var data = req.authId;
+  try {
+    var profileData = await userprofileSchema.findOne({ authId: req.authId });
+    var authData = await userScheema.findOne({ _id: req.authId });
+
+    return res.status(200).json({ profileData, authData });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({
+        message: "Failed to fetch user profile",
+        err: error.message,
+      });
+  }
+
 };
 
 exports.getAllUser = async (req, res) => {
 
-try {
-  
-  var user = await userprofileSchema.find();
+  try {
+
+    var user = await userprofileSchema.find();
 
 
-  
+
     if (user) {
       return res.status(200).json({
         message: "user all users",
@@ -539,9 +541,9 @@ try {
 // exports.Follow = async (req, res) => {
 //   try {
 //     const { body } = req;
-    
 
-  
+
+
 
 //     // Token valid hai, decoded mein user ki information hogi
 //     const { followerId } = body;
@@ -596,10 +598,10 @@ try {
 //   try {
 //     const { body} = req;
 
- 
+
 
 //     // Token ko verify karna
-    
+
 
 //     // Token valid hai, decoded mein user ki information hogi
 //     const { followerId } = body;
@@ -692,52 +694,52 @@ exports.SearchUser = async (req, res) => {
 
 // Edit Profile
 exports.editprofile = async (req, res) => {
-  const { body} = req;
+  const { body } = req;
 
 
   try {
- 
 
-    
-        req.userId = req.user._id;
-        console.log(req.userId);
 
-        const user = await userSchema.findById(req.userId);
 
-        if (user && user.isCompleteProfile === true) {
-          // Check if user's profile is already complete
-          if (req.file) {
-            body.profileImage = req.file.path;
-          }
+    req.userId = req.user._id;
+    console.log(req.userId);
 
-          let updateFields = {
-            username: body.username || user.username,
-            dateOfBirth: body.dateOfBirth || user.dateOfBirth,
-            gender: body.gender || user.gender,
-            favBroadcaster: body.favBroadcaster || user.favBroadcaster,
-            profileImage: body.profileImage || user.profileImage,
-            bio: body.bio || user.bio,
-          };
+    const user = await userSchema.findById(req.userId);
 
-          if (req.file) {
-            updateFields.profileImage = body.profileImage;
-          }
+    if (user && user.isCompleteProfile === true) {
+      // Check if user's profile is already complete
+      if (req.file) {
+        body.profileImage = req.file.path;
+      }
 
-          await userprofileSchema.findOneAndUpdate(
-            { authId: req.userId },
-            updateFields
-          );
+      let updateFields = {
+        username: body.username || user.username,
+        dateOfBirth: body.dateOfBirth || user.dateOfBirth,
+        gender: body.gender || user.gender,
+        favBroadcaster: body.favBroadcaster || user.favBroadcaster,
+        profileImage: body.profileImage || user.profileImage,
+        bio: body.bio || user.bio,
+      };
 
-          return res.status(200).json({
-            message: "Profile updated",
-            data: updateFields,
-          });
-        } else {
-          return res.status(400).json({
-            message: "Profile is not completed yet",
-          });
-        }
-      
+      if (req.file) {
+        updateFields.profileImage = body.profileImage;
+      }
+
+      await userprofileSchema.findOneAndUpdate(
+        { authId: req.userId },
+        updateFields
+      );
+
+      return res.status(200).json({
+        message: "Profile updated",
+        data: updateFields,
+      });
+    } else {
+      return res.status(400).json({
+        message: "Profile is not completed yet",
+      });
+    }
+
     ;
   } catch (e) {
     return res.status(500).json({
@@ -798,7 +800,90 @@ exports.unblockUsers = async (req, res) => {
   }
 };
 
+exports.getFollowersUsers = async (req, res) => {
+  try {
 
+    const data = await userSchema.aggregate([
+      {
+        $lookup: {
+          from: "followings",
+          // from: "followers",
+          localField: "_id",
+          foreignField: "following",
+          // foreignField: "follower",
+          as: "followers"
+        }
+      },
+      {
+        $addFields: {
+          followerCount: { $size: "$followers" }
+        }
+      }
+    ]);
 
+    return res.status(200).json({
+      data: data,
+      status: true,
 
+    })
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message,
+      status: false
+    })
+  }
+}
+
+exports.getAllBroadCasters = async (req, res) => {
+  try {
+    // console.log("boradcaster")
+    // const Users = await userScheema.find();
+    // const data = await Promise.all(Users.map(async (user) => {
+    //   // console.log("user", user);
+    //   const follower = await Followers.find({ follower: user._id });
+    //   return { user, follower: follower?.length };
+    // }));
+
+    // // Sort the data array based on followerCount in descending order
+    // data.sort((a, b) => b.followerCount - a.followerCount);
+
+    // // Get the top 9 users
+    // const topUsers = data.slice(0, 9);
+    // console.log("topUsers", topUsers)
+
+    const data = await userSchema.aggregate([
+      {
+        $lookup: {
+          from: "followings",
+          // from: "followers",
+          localField: "_id",
+          foreignField: "following",
+          // foreignField: "follower",
+          as: "followers"
+        }
+      },
+      {
+        $addFields: {
+          followerCount: { $size: "$followers" }
+        }
+      },
+      {
+        $sort: { followerCount: -1 }
+      },
+      {
+        $limit: 9
+      }
+    ]);
+
+    return res.status(200).json({
+      data: data,
+      status: true
+    })
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message,
+      status: false
+    })
+  }
+}
 

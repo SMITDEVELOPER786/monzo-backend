@@ -14,11 +14,14 @@ exports.uploadReel = async (req, res) => {
             res.status(404).json({ message: "Reel is Required" });
             // console.log(req.user._id)
         }
+        else if (!req.body.userId) {
+            res.status(404).json({ message: "UserId is Required" });
+        }
         else {
             if (!req.file) {
                 return apiResponse.ErrorResponse(res, "Reel format not supported");
             } else {
-                let check = await reelsSchema.find({ title: { '$regex': '^' + req.body.title + '$', "$options": "i" }, owner: req.body.id }).lean().exec();
+                let check = await reelsSchema.find({ title: { '$regex': '^' + req.body.title + '$', "$options": "i" }, owner: req.body.userId }).lean().exec();
                 if (check && check.length > 0) {
                     return res.status(404).json({ status: false, message: "Reel Already Exists" });
                 }
@@ -31,7 +34,7 @@ exports.uploadReel = async (req, res) => {
                 const data = await new reelsSchema({
                     title: req.body.title,
                     video: cloud.url.split("upload/")[1],
-                    owner: req.body.id,
+                    owner: req.body.userId,
                 }).save();
                 // const data1 = await CourseSchema.findOneAndUpdate({ _id: req.body.mealCourse }, {
                 //      dishId: data._id
