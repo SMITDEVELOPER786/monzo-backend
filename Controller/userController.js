@@ -363,12 +363,12 @@ exports.login = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   const id = req.user._id;
-console.log(id,'////////////////////////');
+
   if (email) {
  
     try {
       const user = await userSchema.findOne({ _id: id.toString() });
-console.log(user,'.........................');
+
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
