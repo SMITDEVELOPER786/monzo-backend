@@ -29,17 +29,14 @@ router.get("/logout", userController.Logout);
 
 router.post("/send-otp", userController.sendOtp);
 
-<<<<<<< HEAD
 router.post("/verify-otp",userController.verifyOtp)
 router.post("/completeprofile",upload.single("profileImage"),protect,userController.completeProfile)
 router.post("/forgetpassword",protect,userController.forgotPassword)
 router.post('/change-password',protect, userController.PasswordOtpVerify);
-=======
 router.post("/verify-otp", userController.verifyOtp)
 router.post("/completeprofile", upload.single("profileImage"), protect, userController.completeProfile)
 router.post("/forgetpassword", userController.forgotPassword)
 router.post('/change-password', protect, userController.PasswordOtpVerify);
->>>>>>> 390fb3329d783afeaea8475dc96a8e2d3d5bc260
 
 router.post("/block-users", userController.blockUsers)
 router.post("/unblock-users", userController.unblockUsers)

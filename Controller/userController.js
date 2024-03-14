@@ -404,7 +404,6 @@ exports.forgotPassword = async (req, res) => {
       return res.status(500).json({ message: "Failed to update password" });
     }
 
-<<<<<<< HEAD
 
 
    
@@ -417,7 +416,6 @@ exports.forgotPassword = async (req, res) => {
   
   
   
-=======
     console.log(ckeckUser)
 
 
@@ -434,7 +432,6 @@ exports.forgotPassword = async (req, res) => {
     mail("Your OTP is", otp, email);
 
     return res.status(200).json({ message: "OTP Send Your Mail", otp });
->>>>>>> 390fb3329d783afeaea8475dc96a8e2d3d5bc260
   } else {
     return res.status(401).json({ message: "Enter Email Address" });
   }
