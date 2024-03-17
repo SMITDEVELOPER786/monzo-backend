@@ -11,6 +11,7 @@ const userSchema = require("../Model/userSchema.js");
 const reelsSchema = require('../Model/reelsSchema');
 
 const Followers = require("../Model/Followers.js");
+// const UserProfileSchema = require("../Model/UserProfileSchema.js");
 require("dotenv").config();
 const otpStorage = {};
 
@@ -313,7 +314,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const checkemail = await userScheema.findOne({ email });
- 
+
     if (checkemail) {
       let checkpassword = await bcrypt.compare(password, checkemail.password);
 
@@ -321,18 +322,18 @@ exports.login = async (req, res) => {
         return res.status(400).json({
           message: "password incroect",
         });
-      } 
+      }
       if (!checkemail.isVerify) {
         return res.status(400).json({
           message: "Account is not verified. Please verify your account.",
         });
 
       }
-        if (!checkemail.isCompleteProfile) {
-          return res.status(400).json({
-            message: "Please Complete Your Profile First.",
-          });
-      
+      if (!checkemail.isCompleteProfile) {
+        return res.status(400).json({
+          message: "Please Complete Your Profile First.",
+        });
+
       }
       else {
         const token = jwt.sign({ userId: checkemail._id }, secretkey, {
@@ -362,60 +363,76 @@ exports.login = async (req, res) => {
 // forgotPassword
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
-  const id = req.user._id;
-
   if (email) {
- 
     try {
-      const user = await userSchema.findOne({ _id: id.toString() });
-
-      if (!user) {
-        return res.status(401).json({ message: "User not found" });
-      }
-
 
       let ckeckUser = await userSchema.findOne({ email });
       if (ckeckUser == null) {
-        return res.status(401).json({ message: "Invalid Email Address" });
+        return res.status(401).json({ message: "Email Not found" });
       }
 
-
-
-      
-  
       const otp = Math.floor(Math.random() * 9000);
-  
-   ckeckUser.otp =otp
-  
-   await ckeckUser.save(); // Update karein
-  
-  
-  
+
+      ckeckUser.otp = otp
+
+      const data = await ckeckUser.save(); // Update the user's OTP
+      console.log("data", data)
       mail("Your OTP is", otp, email);
-  
+
       return res.status(200).json({ message: "OTP Send Your Mail", otp });
     }
-    
-
-
-
-
-
-
-    
-     catch (error) {
+    catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Failed to update password" });
     }
-
-
-
-  
   } else {
     return res.status(401).json({ message: "Enter Email Address" });
   }
 };
+exports.VerifyForgetOTP = async (req, res) => {
+  try {
+    const { otp } = req.body;
 
+    if (otp == undefined) {
+      return res.status(401).json({
+        message: "otp not provide",
+      });
+    } else if (otp.length != 4) {
+      return res.status(401).json({
+        message: "Otp must be 4 letter",
+      });
+    } else {
+
+      var userFind = await userScheema.findOne({ otp: otp });
+      // console.log(userFind);
+      if (userFind.otp == otp) {
+        // await userScheema.findByIdAndUpdate(req.userid, {
+        //   isVerify: true,
+        //   // isVerify:
+        // });
+        const token = jwt.sign({ userId: userFind._id }, secretkey, {
+          expiresIn: "4h",
+        });
+        return res.status(200).json({
+          message: "OTP verified",
+          status: true,
+          token
+        });
+      } else {
+        return res.status(401).json({
+          message: "invalid otp",
+        });
+      }
+
+    }
+
+  } catch (error) {
+    return res.status(401).json({
+      message: "Internal Server",
+      data: error.message,
+    });
+  }
+}
 // PasswordOtpVerify
 exports.PasswordOtpVerify = async (req, res) => {
   const { newPassword } = req.body;
@@ -446,7 +463,7 @@ exports.PasswordOtpVerify = async (req, res) => {
       return res.status(500).json({ message: "Failed to update password" });
     }
   } else {
-    return res.status(401).json({ message: "Enter all data" });
+    return res.status(401).json({ message: "Please Enter New Password" });
   }
 };
 
@@ -893,29 +910,102 @@ exports.getAllBroadCasters = async (req, res) => {
     // const topUsers = data.slice(0, 9);
     // console.log("topUsers", topUsers)
 
-    const data = await userSchema.aggregate([
+    // const data = await userSchema.aggregate([
+    //   {
+    //     $lookup: {
+    //       from: "followers",
+    //       localField: "_id",
+    //       foreignField: "follower",
+    //       as: "followers"
+    //     }
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "userprofiles",
+    //       localField: "_id",
+    //       foreignField: "authId",
+    //       as: "User"
+    //     }
+    //   },
+    //   {
+    //     $addFields: {
+    //       followers: { $size: "$followers" },
+    //       // username: "$User.username"
+    //     }
+    //   },
+    //   {
+    //     $project: {
+    //       email: 1,
+    //       followers: 1,
+    //       name: { $arrayElemAt: ["$User.username", 0] }, // Extract name from the array
+    //       // userId: { $arrayElemAt: ["$User.authId", 0] }, // Extract userId from the array
+    //       profileImage: { $arrayElemAt: ["$User.profileImage", 0] }, // Extract profileImage from the array
+
+    //       _id: 1 // Exclude the _id field if you don't need it,
+    //     }
+    //   },
+    //   {
+    //     $sort: { followers: -1 }
+    //   },
+    //   {
+    //     $limit: 9
+    //   }
+    // ]);
+
+    let data = await userSchema.aggregate([
+      { $match: {} },
       {
         $lookup: {
-          // from: "followings",
           from: "followers",
-          localField: "_id",
-          // foreignField: "following",
-          foreignField: "follower",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$follower", "$$id"]
+                }
+              }
+            }
+          ],
           as: "followers"
         }
       },
       {
-        $addFields: {
-          followerCount: { $size: "$followers" }
+        $lookup: {
+          from: "userprofiles",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$authId", "$$id"]
+                }
+              }
+            },
+            { $project: { username: 1, profileImage: 1, _id: 0 } }
+          ],
+          as: "User"
         }
       },
       {
-        $sort: { followerCount: -1 }
+        $addFields: {
+          followers: { $size: "$followers" }
+        }
       },
       {
-        $limit: 9
-      }
-    ]);
+        $project: {
+          email: 1,
+          followers: 1,
+          name: { $arrayElemAt: ["$User.username", 0] },
+          profileImage: { $arrayElemAt: ["$User.profileImage", 0] },
+          _id: 1
+        }
+      },
+      { $sort: { followers: -1 } },
+      { $limit: 9 }
+    ])
+
+
 
     return res.status(200).json({
       data: data,
