@@ -22,6 +22,13 @@ const accountSid = "AC22b19e84befb3f08053353e2b1421279";
 const authToken = "9ab34bcaf36b5664bb1f529a40e60e9c";
 const client = new twilio(accountSid, authToken);
 
+
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 // youtube ka sendOtp
 
 exports.sendOtp = async (req, res) => {
@@ -471,12 +478,11 @@ exports.PasswordOtpVerify = async (req, res) => {
 exports.completeProfile = async (req, res) => {
   const { body } = req;
 
-
   try {
 
 
     req.userId = req.user._id;
-    console.log(req.userid);
+
     const user = await userSchema.findById(req.userId);
 
     if (user && user.isCompleteProfile === false) {
@@ -490,11 +496,18 @@ exports.completeProfile = async (req, res) => {
         });
       }
 
+      const cloud = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
+      });
+
+      // Now you can use result.secure_url to access the uploaded image URL
+      // console.log("Cloudinary response:", cloud);
+      // console.log(cloud.secure_url.split("upload/")[1]);
       let obj = {
         username: body.username,
         dateOfBirth: body.dateOfBirth,
         gender: body.gender,
-        profileImage: body.profileImage,
+        profileImage: cloud.secure_url.split("upload/")[1],
         favBroadcaster: body.favBroadcaster,
         authId: req.userId,
       };
