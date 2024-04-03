@@ -53,7 +53,31 @@ exports.uploadReel = async (req, res) => {
 
 exports.getReels = async (req, res) => {
     try {
-        const data = await reelsSchema.find()
+        let data = await reelsSchema.aggregate([
+            { $match: {} },
+            {
+                $lookup: {
+                    from: "userprofiles",
+                    let: { id: "$owner" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [{ $eq: ["$authId", "$$id"] }],
+                                },
+                            },
+                        },
+                        { $project: { username: 1, profileImage: 1, } }
+                    ],
+                    as: "User",
+                },
+            },
+            {
+                $unwind: "$User"
+            },
+          
+        ]);
+
         return res.status(200).json({
             data: data,
             status: true
@@ -68,13 +92,18 @@ exports.getReels = async (req, res) => {
 
 exports.likeReel = async (req, res) => {
     try {
+        if (!req.body.userId) {
+            return res.status(404).json({
+                message: "userId not found"
+            })
+        }
         if (req.body.reelId) {
             const reel = await reelsSchema.findById({ _id: req.body.reelId })
             if (reel) {
                 // console.log("checkReel", reel)
                 // Assuming req.user contains the ID of the user liking the reel
-                // const likeId = req.body.use/rId;
-                console.log(req.body.userId)
+                // const userId = req.body.use/rId;
+                // console.log(req.body.userId)
                 // Add the user's ID to the like array
                 reel.like.push(req.body.userId);
                 await reel.save(); // Save the updated reel document
@@ -106,16 +135,16 @@ exports.likeReel = async (req, res) => {
 
 exports.dislikeReel = async (req, res) => {
     try {
-        const { reelId, likeId } = req.body;
-        if (!reelId || !likeId) {
+        const { reelId, userId } = req.body;
+        if (!reelId || !userId) {
             return res.status(400).json({
-                message: "reelId and likeId are not found."
+                message: "reelId and userId are not found."
             });
         }
         const reel = await reelsSchema.findById({ _id: req.body.reelId })
 
         // Check if the user has already liked the reel
-        const alreadyLikedIndex = reel.like.indexOf(likeId);
+        const alreadyLikedIndex = reel.like.indexOf(userId);
         if (alreadyLikedIndex !== -1) {
             // If the user has already liked the reel, remove their like
             reel.like.splice(alreadyLikedIndex, 1);
