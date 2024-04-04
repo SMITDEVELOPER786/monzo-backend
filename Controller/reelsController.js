@@ -75,7 +75,7 @@ exports.getReels = async (req, res) => {
             {
                 $unwind: "$User"
             },
-          
+
         ]);
 
         return res.status(200).json({
@@ -92,39 +92,38 @@ exports.getReels = async (req, res) => {
 
 exports.likeReel = async (req, res) => {
     try {
-        if (!req.body.userId) {
-            return res.status(404).json({
-                message: "userId not found"
-            })
+        const { reelId, userId } = req.body;
+        if (!reelId || !userId) {
+            return res.status(400).json({
+                message: "reelId or userId are not found."
+            });
         }
-        if (req.body.reelId) {
-            const reel = await reelsSchema.findById({ _id: req.body.reelId })
-            if (reel) {
-                // console.log("checkReel", reel)
-                // Assuming req.user contains the ID of the user liking the reel
-                // const userId = req.body.use/rId;
-                // console.log(req.body.userId)
-                // Add the user's ID to the like array
-                reel.like.push(req.body.userId);
-                await reel.save(); // Save the updated reel document
-
-                return res.status(200).json({
-                    status: true,
-                    message: "Reel liked successfully",
-                    data: reel
+        // if (reelId) {
+        const reel = await reelsSchema.findById({ _id: reelId })
+        if (reel) {
+            // Check if the user has already liked the reel
+            if (reel.like.includes(userId)) {
+                return res.status(400).json({
+                    message: "You have already liked this reel"
                 });
             }
-            else {
-                return res.status(404).json({
-                    message: "invalid id or reel may be deleted",
-                })
-            }
+            // Add the user's ID to the like array
+            reel.like.push(userId);
+            await reel.save(); // Save the updated reel document
+
+            return res.status(200).json({
+                status: true,
+                message: "Reel liked successfully",
+                data: reel
+            });
         }
         else {
             return res.status(404).json({
-                message: "reel id not found",
+                message: "invalid reelId or reel may be deleted",
             })
+            // }
         }
+
     } catch (err) {
         return res.status(500).json({
             status: false,
@@ -141,7 +140,7 @@ exports.dislikeReel = async (req, res) => {
                 message: "reelId and userId are not found."
             });
         }
-        const reel = await reelsSchema.findById({ _id: req.body.reelId })
+        const reel = await reelsSchema.findById({ _id: reelId })
 
         // Check if the user has already liked the reel
         const alreadyLikedIndex = reel.like.indexOf(userId);
@@ -151,6 +150,11 @@ exports.dislikeReel = async (req, res) => {
             await reel.save();
             return res.status(200).json({
                 message: "Reel disliked.",
+                status: true
+            });
+        } if (alreadyLikedIndex === -1) {
+            return res.status(200).json({
+                message: "Reel not liked yet.",
                 status: true
             });
         }
