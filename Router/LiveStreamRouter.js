@@ -1,7 +1,11 @@
 const exp = require("express");
-const { LiveStreamController } = require("../Controller/LiveStreamController");
+const { getAllLiveStreams, CreateLiveStreamController, joinLiveStream, EndLiveStream } = require("../Controller/LiveStreamController");
 const router = exp.Router();
 
-router.post("/live-stream", auth, LiveStreamController)
+// router.post("/create-live-stream", auth, CreateLiveStreamController)
+router.route("/get").get(getAllLiveStreams);
+router.route("/create").post(CreateLiveStreamController);
+router.route("/join").post(joinLiveStream);
+router.route("/end").post(EndLiveStream);
 
 module.exports = router;

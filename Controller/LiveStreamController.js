@@ -1,7 +1,7 @@
 const LiveStreamSchema = require("../Model/LiveStreamSchema");
 const UserProfileSchema = require("../Model/UserProfileSchema");
 
-exports.LiveStreamController = async (req, res) => {
+exports.CreateLiveStreamController = async (req, res) => {
     try {
         const { streamType, title, scheduleTime, streamLevel, tags } = req.body;
 
@@ -70,3 +70,92 @@ exports.LiveStreamController = async (req, res) => {
         });
     }
 };
+
+exports.getAllLiveStreams = async (req, res) => {
+    try {
+        const data = await LiveStreamSchema.find({ isdelete: false });
+        return res.status(200).json({
+            data: data,
+            status: true
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+            status: false
+        })
+    }
+}
+
+exports.joinLiveStream = async (req, res) => {
+    try {
+        const { streamId, streamPass } = req.body;
+        if (!streamId) {
+            return res.status(404).json({
+                message: "streamId is required"
+            })
+        }
+        if (!req.user._id) {
+            return res.status(404).json({
+                message: "userId is required"
+            })
+        }
+        const findStream = await LiveStreamSchema.findOne({ _id: streamId, isdelete: false });
+
+        if (!findStream) {
+            return res.status(404).json({ message: "Stream not found." });
+        }
+
+        if (findStream.streamType === "private") {
+            if (!streamPass) {
+                return res.status(404).json({
+                    message: "streamPass is required"
+                })
+            }
+            return res.status(200).json({
+                data: "give password this is private stream"
+            })
+        }
+        if (findStream.userId.includes(req.user._id)) return res.status(404).json({ message: "stream already joined" })
+        findStream.userId.push(req.user._id);
+        await findStream.save()
+        return res.status(200).json({
+            message: "stream joined Successfully...!",
+            data: findStream
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+            status: false
+        })
+    }
+}
+
+
+exports.EndLiveStream = async (req, res) => {
+    try {
+        const { streamId } = req.body;
+        if (!streamId) {
+            return res.status(400).json({
+                message: "streamId is not provided"
+            })
+        }
+        const foundStream = await LiveStreamSchema.findOne({ _id: streamId, isdelete: false });
+        if (!foundStream) {
+            return res.status(400).json({ message: "Stream already ended" });
+        }
+
+        foundStream.isdelete = true; // Set the isdelete flag to true
+        await foundStream.save(); // Save the updated document
+
+        return res.status(400).json({
+            message: "Stream ended successfully"
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+            status: false
+        })
+    }
+}
