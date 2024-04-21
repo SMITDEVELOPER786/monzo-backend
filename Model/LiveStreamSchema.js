@@ -14,6 +14,7 @@ const StreamSchema = mongoose.Schema({
     title: { type: String, required: true },
     streamType: { type: String, required: true, enum: streamTypeEnum },
     streamLevel: { type: String, required: true, enum: streamLevelEnum },
+    streamPass: { type: String }, // only for private streams
     scheduleTime: { type: String },
     userId: [{ type: Schema.Types.ObjectId, ref: "users" }],
     tags: [{ type: String }],

@@ -3,7 +3,7 @@ const UserProfileSchema = require("../Model/UserProfileSchema");
 
 exports.CreateLiveStreamController = async (req, res) => {
     try {
-        const { streamType, title, scheduleTime, streamLevel, tags } = req.body;
+        const { streamType, title, scheduleTime, streamLevel, tags, streamPass } = req.body;
 
         // Input Validation
         if (!streamType) {
@@ -45,6 +45,13 @@ exports.CreateLiveStreamController = async (req, res) => {
             });
         }
 
+        if (streamLevel.toLowerCase() === "private" && !streamPass) {
+            return res.status(400).json({
+                message: "Stream password is required for private streams.",
+                status: false
+            });
+        }
+
         // Create Live Stream Data
         const liveStreamData = {
             hostName: user.username,
@@ -56,6 +63,11 @@ exports.CreateLiveStreamController = async (req, res) => {
             streamLevel,
             tags, // Include tags if provided
         };
+
+        // Include streamPass if streamLevel is private
+        if (streamLevel.toLowerCase() === "private") {
+            liveStreamData.streamPass = streamPass;
+        }
 
         const newLiveStream = await LiveStreamSchema.create(liveStreamData);
 
@@ -105,17 +117,20 @@ exports.joinLiveStream = async (req, res) => {
             return res.status(404).json({ message: "Stream not found." });
         }
 
-        if (findStream.streamType === "private") {
+        if (findStream.streamLevel === "private") {
             if (!streamPass) {
                 return res.status(404).json({
-                    message: "streamPass is required"
+                    message: "give password this is private stream"
                 })
             }
-            return res.status(200).json({
-                data: "give password this is private stream"
-            })
+            if (streamPass !== findStream.streamPass)
+                return res.status(200).json({
+                    data: "password are not same"
+                })
         }
-        if (findStream.userId.includes(req.user._id)) return res.status(404).json({ message: "stream already joined" })
+
+        if (findStream.userId.includes(req.user._id))
+            return res.status(404).json({ message: "stream already joined" })
         findStream.userId.push(req.user._id);
         await findStream.save()
         return res.status(200).json({
