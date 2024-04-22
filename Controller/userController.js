@@ -84,6 +84,7 @@ exports.signup = async (req, res) => {
 
       req.body.otp = otp;
 
+      // const userObj = 
       const user = userScheema(req.body);
 
       // const otp = Math.random(Math.floor*900000)
@@ -96,7 +97,7 @@ exports.signup = async (req, res) => {
 
       await user.save();
       return res.status(201).json({
-        message: "create user",
+        message: "User Created",
         data: user,
         token,
         otp,
@@ -580,8 +581,6 @@ exports.getAllUser = async (req, res) => {
 
     var user = await userprofileSchema.find();
 
-
-
     if (user) {
       return res.status(200).json({
         message: "user all users",
@@ -1032,3 +1031,62 @@ exports.getAllBroadCasters = async (req, res) => {
   }
 }
 
+exports.levelUpUser = async (req, res) => {
+  try {
+
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({
+        message: "User Id required"
+      })
+    }
+    const user = await userScheema.findById({ _id: userId })
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found"
+      })
+    }
+    user.isLevel += 1;
+    await user.save()
+    return res.status(200).json({
+      message: `user leveled up to ${user.isLevel}`
+    })
+
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message,
+      status: false
+    })
+  }
+}
+
+exports.levelDownUser = async (req, res) => {
+  try {
+
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({
+        message: "User Id required"
+      })
+    }
+    const user = await userScheema.findById({ _id: userId })
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found"
+      })
+    }
+    user.isLevel -= 1;
+    await user.save()
+    return res.status(200).json({
+      message: `user level down to ${user.isLevel}`
+    })
+
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message,
+      status: false
+    })
+  }
+}

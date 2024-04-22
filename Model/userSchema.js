@@ -19,12 +19,20 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isBan: {
+    type: Boolean,
+    default: false,
+  },
+  isLevel: {
+    type: Number,
+    default: 0,
+  },
   isCompleteProfile: {
     type: Boolean,
     default: false,
   },
   ProfileId: {
-    type:mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "userprofiles",
   },
 })
