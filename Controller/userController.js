@@ -821,22 +821,37 @@ exports.editprofile = async (req, res) => {
 };
 
 // Block User
-exports.blockUsers = async (req, res) => {
+exports.blockUser = async (req, res) => {
   try {
-    await userprofileSchema.findByIdAndUpdate(
-      req.body.userId,
-      {
-        $set: {
-          isBlocked: true,
-        },
-      },
-      { new: true }
-    );
+    const { userId } = req.body
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required"
+      })
+    }
+    const user = await userprofileSchema.findOne({ authId: userId });
+    // const user = await userSchema.findById({ _id: userId });
+    if (!user) {
+      return res.status(400).json({
+        message: "user not found"
+      })
+    }
+    if (user.isBlocked === false) {
 
-    return res.status(200).json({
-      success: true,
-      message: "User Blocked Successfully",
-    });
+      user.isBlocked = true;
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "User Blocked Successfully",
+      });
+
+    }
+
+    return res.status(400).json({
+      message: "user already blocked"
+    })
+
   } catch (error) {
     return res.status(400).json({
       success: false,
@@ -846,23 +861,38 @@ exports.blockUsers = async (req, res) => {
 };
 
 // UnBlock User
-exports.unblockUsers = async (req, res) => {
-  console.log(req.body.userId, "..............");
+exports.unblockUser = async (req, res) => {
+  // console.log(req.body.userId);
   try {
-    await userprofileSchema.findByIdAndUpdate(
-      req.body.userId,
-      {
-        $set: {
-          isBlocked: false,
-        },
-      },
-      { new: true }
-    );
+    const { userId } = req.body
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required"
+      })
+    }
+    const user = await userprofileSchema.findOne({ authId: userId });
+    // const user = await userSchema.findById({ _id: userId });
+    if (!user) {
+      return res.status(400).json({
+        message: "user not found"
+      })
+    }
+    if (user.isBlocked === true) {
 
-    return res.status(200).json({
-      success: true,
-      message: "User unBlocked Successfully",
+      user.isBlocked = false;
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "User Unblocked Successfully",
+      });
+
+    }
+
+    return res.status(400).json({
+      message: "user already Unblocked"
     });
+
   } catch (error) {
     return res.status(400).json({
       success: false,
