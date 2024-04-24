@@ -3,7 +3,7 @@ const UserProfileSchema = require("../Model/UserProfileSchema");
 
 exports.CreateLiveStreamController = async (req, res) => {
     try {
-        const { streamType, title, scheduleTime, streamLevel, tags, streamPass } = req.body;
+        const { streamType, title, scheduleTime, streamLevel, tags, streamPass, country } = req.body;
 
         // Input Validation
         if (!streamType) {
@@ -15,6 +15,11 @@ exports.CreateLiveStreamController = async (req, res) => {
         if (!title) {
             return res.status(400).json({
                 message: "Title is required",
+            });
+        }
+        if (!country) {
+            return res.status(400).json({
+                message: "Country is required",
             });
         }
 
@@ -62,6 +67,7 @@ exports.CreateLiveStreamController = async (req, res) => {
             // ...(scheduleTime ? { scheduleTime }) : { }, // Include scheduleTime if provided
             streamLevel,
             tags, // Include tags if provided
+            country,
         };
 
         // Include streamPass if streamLevel is private
@@ -85,9 +91,41 @@ exports.CreateLiveStreamController = async (req, res) => {
 
 exports.getAllLiveStreams = async (req, res) => {
     try {
-        const data = await LiveStreamSchema.find({ isdelete: false });
+        const data = await LiveStreamSchema.aggregate([
+            { $match: { isdelete: false } },
+            {
+                $lookup: {
+                    let: { id: "$hostId" },
+                    from: "userprofiles",
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: { $eq: ["$authId", "$$id"] }
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 0, // Exclude unnecessary document ID
+                                profileImage: 1
+                            }
+                        }
+                    ],
+
+                    as: "profileImage" 
+                }
+            },
+            {
+                $addFields: {
+                    profileImage: { $arrayElemAt: ["$profileImage.profileImage", 0] }
+                }
+            },
+        ]);
+
         return res.status(200).json({
             data: data,
+            length: data.length,
             status: true
         })
     } catch (err) {

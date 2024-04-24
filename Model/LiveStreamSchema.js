@@ -18,7 +18,10 @@ const StreamSchema = mongoose.Schema({
     scheduleTime: { type: String },
     userId: [{ type: Schema.Types.ObjectId, ref: "users" }],
     tags: [{ type: String }],
-    isdelete: { type: Boolean, default: false } // Adding default value false
+    isdelete: { type: Boolean, default: false }, // Adding default value false
+    streamImg: { type: String },
+    country: { type: String },
+
 });
 
 module.exports = mongoose.model("livestreams", StreamSchema);
