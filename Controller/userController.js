@@ -1107,6 +1107,12 @@ exports.levelDownUser = async (req, res) => {
         message: "User not found"
       })
     }
+    console.log(user.isLevel)
+    if (user.isLevel < 1) {
+      return res.status(400).json({
+        message: `User already at ${user.isLevel}`,
+      })
+    }
     user.isLevel -= 1;
     await user.save()
     return res.status(200).json({

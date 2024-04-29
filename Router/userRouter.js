@@ -48,7 +48,7 @@ router.post("/unblock-user", userController.unblockUser)
 
 router.get("/myprofile", protect, userController.Myprofile)
 router.get("/get-all-user", userController.getAllUser)
-router.post("/levelUp-user", protect, userController.levelUpUser)
+router.post("/levelUp-user",  userController.levelUpUser)
 router.post("/levelDown-user",  userController.levelDownUser)
 router.post("/follow", protect, follow)
 router.post("/unfollow", protect, unfollow)
