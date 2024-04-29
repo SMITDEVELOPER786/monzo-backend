@@ -55,7 +55,7 @@ const userprofileSchema = new mongoose.Schema({
 
   banDuration: {
     type: String,
-    required: true,
+    required: false,
     enum: ["7 days", " 14 days", "1 month", "permanent"],
   }
 
