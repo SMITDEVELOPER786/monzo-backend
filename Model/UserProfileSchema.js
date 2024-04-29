@@ -36,7 +36,7 @@ const userprofileSchema = new mongoose.Schema({
     default: 0,
   },
   authId: {
-    type:mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "users",
     required: true,
   },
@@ -47,8 +47,17 @@ const userprofileSchema = new mongoose.Schema({
   isBlocked: {
     type: Boolean,
     default: false
-},
+  },
+  isBan: {
+    type: Boolean,
+    default: false
+  },
 
+  banDuration: {
+    type: String,
+    required: true,
+    enum: ["7 days", " 14 days", "1 month", "permanent"],
+  }
 
 
 

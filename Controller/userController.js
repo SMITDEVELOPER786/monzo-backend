@@ -867,14 +867,20 @@ exports.editprofile = async (req, res) => {
 // Block User
 exports.banUser = async (req, res) => {
   try {
-    const { userId } = req.body
+    const { userId, banDuration } = req.body
     if (!userId) {
       return res.status(400).json({
         message: "userId is required"
       })
     }
-    // const user = await userprofileSchema.findOne({ authId: userId });
-    const user = await userSchema.findById({ _id: userId });
+    if (!banDuration) {
+      return res.status(400).json({
+        message: "ban duration is required"
+      })
+    }
+
+    const user = await userprofileSchema.findOne({ authId: userId });
+    // const user = await userSchema.findById({ _id: userId });
     if (!user) {
       return res.status(400).json({
         message: "user not found"
@@ -883,6 +889,7 @@ exports.banUser = async (req, res) => {
     if (user.isBan === false) {
 
       user.isBan = true;
+      user.banDuration = banDuration;
       await user.save();
 
       return res.status(200).json({
@@ -904,26 +911,34 @@ exports.banUser = async (req, res) => {
   }
 };
 
-// UnBlock User
+// unBanUser User
 exports.unBanUser = async (req, res) => {
   // console.log(req.body.userId);
   try {
-    const { userId } = req.body
+    const { userId, banDuration } = req.body
     if (!userId) {
       return res.status(400).json({
         message: "userId is required"
       })
     }
-    // const user = await userprofileSchema.findOne({ authId: userId });
-    const user = await userSchema.findById({ _id: userId });
+    // if (!banDuration) {
+    //   return res.status(400).json({
+    //     message: "ban duration is required"
+    //   })
+    // }
+
+    const user = await userprofileSchema.findOne({ authId: userId });
+    // const user = await userSchema.findById({ _id: userId });
     if (!user) {
       return res.status(400).json({
         message: "user not found"
       })
     }
+    console.log(user.banDuration)
     if (user.isBan === true) {
 
       user.isBan = false;
+      // user.banDuration = null;
       await user.save();
 
       return res.status(200).json({
