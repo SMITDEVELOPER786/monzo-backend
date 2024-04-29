@@ -579,7 +579,51 @@ exports.getAllUser = async (req, res) => {
 
   try {
 
-    var user = await userprofileSchema.find();
+    var user = await userSchema.aggregate([
+      { $match: {} },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: "$_id" },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $and: { $eq: ["$_id", "$$id"] }
+              }
+            }
+          },
+          ],
+          as: "User"
+        }
+      },
+      {
+        $lookup: {
+          from: "userprofiles",
+          let: { id: "$_id" },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $and: { $eq: ["$authId", "$$id"] }
+              }
+            }
+          },
+          ],
+          as: "UserProf"
+        }
+      },
+      {
+        $project: {
+          isBan: { $arrayElemAt: ["$User.isBan", 0] },
+          isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
+          username: { $arrayElemAt: ["$UserProf.username", 0] },
+          dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
+          profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
+          gender: { $arrayElemAt: ["$UserProf.gender", 0] },
+          isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
+          // username: { $arrayElemAt: ["$UserProf.username", 0] },
+        }
+      }
+    ]);
 
     if (user) {
       return res.status(200).json({
@@ -821,7 +865,7 @@ exports.editprofile = async (req, res) => {
 };
 
 // Block User
-exports.blockUser = async (req, res) => {
+exports.banUser = async (req, res) => {
   try {
     const { userId } = req.body
     if (!userId) {
@@ -829,16 +873,16 @@ exports.blockUser = async (req, res) => {
         message: "userId is required"
       })
     }
-    const user = await userprofileSchema.findOne({ authId: userId });
-    // const user = await userSchema.findById({ _id: userId });
+    // const user = await userprofileSchema.findOne({ authId: userId });
+    const user = await userSchema.findById({ _id: userId });
     if (!user) {
       return res.status(400).json({
         message: "user not found"
       })
     }
-    if (user.isBlocked === false) {
+    if (user.isBan === false) {
 
-      user.isBlocked = true;
+      user.isBan = true;
       await user.save();
 
       return res.status(200).json({
@@ -861,7 +905,7 @@ exports.blockUser = async (req, res) => {
 };
 
 // UnBlock User
-exports.unblockUser = async (req, res) => {
+exports.unBanUser = async (req, res) => {
   // console.log(req.body.userId);
   try {
     const { userId } = req.body
@@ -870,16 +914,16 @@ exports.unblockUser = async (req, res) => {
         message: "userId is required"
       })
     }
-    const user = await userprofileSchema.findOne({ authId: userId });
-    // const user = await userSchema.findById({ _id: userId });
+    // const user = await userprofileSchema.findOne({ authId: userId });
+    const user = await userSchema.findById({ _id: userId });
     if (!user) {
       return res.status(400).json({
         message: "user not found"
       })
     }
-    if (user.isBlocked === true) {
+    if (user.isBan === true) {
 
-      user.isBlocked = false;
+      user.isBan = false;
       await user.save();
 
       return res.status(200).json({
