@@ -43,7 +43,7 @@ router.post('/change-password', protect, userController.PasswordOtpVerify);
 
 router.post("/ban-user", userController.banUser)
 router.post("/unBan-user", userController.unBanUser)
-router.post("/changeBan-user", userController.changeBanUser)
+// router.post("/changeBan-user", userController.changeBanUser)
 
 
 
