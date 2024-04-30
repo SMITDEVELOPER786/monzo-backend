@@ -56,11 +56,11 @@ const userprofileSchema = new mongoose.Schema({
   banDuration: {
     type: String,
     required: false,
-    enum: ["7 days", " 14 days", "1 month", "permanent"],
+    enum: ["7 days", "14 days", "1 month", "permanent"],
   }
 
 
 
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("userprofiles", userprofileSchema);

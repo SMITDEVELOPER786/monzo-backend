@@ -899,9 +899,13 @@ exports.banUser = async (req, res) => {
 
     }
 
-    return res.status(400).json({
-      message: "user already blocked"
-    })
+    user.banDuration = banDuration;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `User Block duration updated to ${banDuration}`,
+    });
 
   } catch (error) {
     return res.status(400).json({
@@ -913,20 +917,13 @@ exports.banUser = async (req, res) => {
 
 // unBanUser User
 exports.unBanUser = async (req, res) => {
-  // console.log(req.body.userId);
   try {
-    const { userId, banDuration } = req.body
+    const { userId } = req.body
     if (!userId) {
       return res.status(400).json({
         message: "userId is required"
       })
     }
-    // if (!banDuration) {
-    //   return res.status(400).json({
-    //     message: "ban duration is required"
-    //   })
-    // }
-
     const user = await userprofileSchema.findOne({ authId: userId });
     // const user = await userSchema.findById({ _id: userId });
     if (!user) {
@@ -934,10 +931,11 @@ exports.unBanUser = async (req, res) => {
         message: "user not found"
       })
     }
-    console.log(user.banDuration)
+
     if (user.isBan === true) {
 
       user.isBan = false;
+      user.banDuration = null;
       // user.banDuration = null;
       await user.save();
 
@@ -945,7 +943,6 @@ exports.unBanUser = async (req, res) => {
         success: true,
         message: "User Unblocked Successfully",
       });
-
     }
 
     return res.status(400).json({
@@ -959,6 +956,51 @@ exports.unBanUser = async (req, res) => {
     });
   }
 };
+
+// changeBan User
+// exports.changeBanUser = async (req, res) => {
+//   try {
+//     const { banDuration, userId } = req.body;
+//     if (!userId) {
+//       return res.status(400).json({
+//         message: "userId is required"
+//       })
+//     }
+//     if (!banDuration) {
+//       return res.status(400).json({
+//         message: "ban duration is required"
+//       })
+//     }
+
+//     const user = await userprofileSchema.findOne({ authId: userId });
+//     // const user = await userSchema.findById({ _id: userId });
+//     if (!user) {
+//       return res.status(400).json({
+//         message: "user not found"
+//       })
+//     }
+//     if (user.isBan === false) {
+//       return res.status(200).json({
+//         success: true,
+//         message: "User is Unblocked..! block it first ",
+//       });
+//     }
+//     user.banDuration = banDuration;
+//     await user.save();
+
+//     return res.status(200).json({
+//       success: true,
+//       message: `User Block duration updated to ${banDuration}`,
+//     });
+
+
+//   } catch (err) {
+//     return res.status(500).json({
+//       message: err.message,
+//       status: false
+//     })
+//   }
+// }
 
 exports.getFollowersUsers = async (req, res) => {
   try {

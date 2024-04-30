@@ -42,7 +42,8 @@ router.post("/verify-forget-otp", userController.VerifyForgetOTP)
 router.post('/change-password', protect, userController.PasswordOtpVerify);
 
 router.post("/ban-user", userController.banUser)
-router.post("/unban-user", userController.unBanUser)
+router.post("/unBan-user", userController.unBanUser)
+router.post("/changeBan-user", userController.changeBanUser)
 
 
 
