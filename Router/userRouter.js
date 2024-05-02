@@ -8,8 +8,8 @@ const reelRouter = require("./reelRouter.js")
 const LiveStreamRouter = require("./LiveStreamRouter.js")
 const { unfollow, follow, getListFollowValidationRules } = require("../Controller/FollowController.js")
 const { LiveStreamController } = require("../Controller/LiveStreamController.js")
-
-
+const adminRouter = require("./adminRouter.js")
+const subAdminRouter = require("./subAdminRouter.js")
 
 
 const storage = multer.diskStorage({
@@ -65,6 +65,9 @@ router.put("/edit-profile", upload.single("profileImage"), protect, userControll
 router.use("/reel", reelRouter)
 router.use("/live-stream", protect, LiveStreamRouter)
 
+// for admin
+router.use("/admin", adminRouter)
+router.use("/sub-admin", subAdminRouter)
 
 
 module.exports = router;
