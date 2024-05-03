@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 const AdminController = require("../Controller/AdminController")
 const userController = require("../Controller/userController.js")
-const protectAdmin = require("../AuthMiddleware/protect.js")
+const protectSubAdmin = require("../AuthMiddleware/protect.js")
 const multer = require("multer")
 
 const storage = multer.diskStorage({
@@ -23,9 +23,9 @@ const upload = multer({ storage: storage });
 // router.post("/signup", AdminController.signup)
 // router.post("/verifyOtp", AdminController.verifyOtp)
 router.post("/login", AdminController.loginSubAdmin)
-router.post("/ban-user", protectAdmin, userController.banUser)
-router.post("/unban-user", protectAdmin, userController.unBanUser)
-router.post("/search-user", protectAdmin, AdminController.searchById)
-router.post("/edit-user", protectAdmin, upload.single("profileImage"), AdminController.editUserInfo)
+router.post("/ban-user", protectSubAdmin, userController.banUser)
+router.post("/unban-user", protectSubAdmin, userController.unBanUser)
+router.post("/search-user", protectSubAdmin, AdminController.searchById)
+router.put("/edit-user/:id", protectSubAdmin, upload.single("profileImage"), AdminController.editUserInfo)
 
 module.exports = router

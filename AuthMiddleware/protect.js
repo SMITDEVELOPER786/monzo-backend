@@ -45,6 +45,38 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
       res.status(402);
       throw new Error("User Not Found");
     }
+    if (user.role !== "admin") {
+      res.status(402);
+      throw new Error("you are not admin. login as admin");
+    }
+
+    req.user = user;
+    next();
+
+  }
+  catch (err) {
+    return res.status(500).json({
+      message: err.message
+    })
+  }
+})
+
+const protectSubAdmin = asyncHandler(async (req, res, next) => {
+  try {
+    const token = req.headers.authorization && req.headers.authorization.split(" ")[1]; // Check if authorization header exists
+    if (!token) {
+      res.status(402);
+      throw new Error("Not Authorized, please login as admin");
+    }
+
+    const verify = jwt.verify(token, process.env.secret_key)
+
+    const user = await AdminSchema.findById(verify.userId).select("-password");
+
+    if (!user) {
+      res.status(402);
+      throw new Error("User Not Found");
+    }
 
     req.user = user;
     next();
@@ -59,3 +91,4 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
 
 module.exports = protect;
 module.exports = protectAdmin;
+module.exports = protectSubAdmin;

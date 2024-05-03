@@ -286,21 +286,22 @@ exports.searchById = async (req, res) => {
 exports.editUserInfo = async (req, res) => {
 
     try {
-        const { userId } = req.body;
-        // console.log(userId);
+        const userId = req.params.id;
+        console.log(req.params.id);
         // console.log(req.body);
 
-        if (!userId) {
-            return res.status(400).json({
-                message: "Enter Id to edit"
-            })
-        }
+        // if (!userId) {
+        //     return res.status(400).json({
+        //         message: "Enter Id to edit"
+        //     })
+        // }
         // "email": "bilal@gmail.com",
 
         let user = await userSchema.findOne({ _id: userId });
         let userProf = await UserProfileSchema.findOne({ authId: userId });
-
-        const cloud = await cloudinary.uploader.upload(req.file.path, {
+        
+        // console.log(req?.file)
+        const cloud = await cloudinary.uploader.upload(req?.file?.path, {
             folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
         });
 

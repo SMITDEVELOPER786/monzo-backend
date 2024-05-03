@@ -10,6 +10,7 @@ const { unfollow, follow, getListFollowValidationRules } = require("../Controlle
 const { LiveStreamController } = require("../Controller/LiveStreamController.js")
 const adminRouter = require("./adminRouter.js")
 const subAdminRouter = require("./subAdminRouter.js")
+const bannerRouter = require("./bannerRouter.js")
 
 
 const storage = multer.diskStorage({
@@ -49,8 +50,8 @@ router.post("/unBan-user", userController.unBanUser)
 
 router.get("/myprofile", protect, userController.Myprofile)
 router.get("/get-all-user", userController.getAllUser)
-router.post("/levelUp-user",  userController.levelUpUser)
-router.post("/levelDown-user",  userController.levelDownUser)
+router.post("/levelUp-user", userController.levelUpUser)
+router.post("/levelDown-user", userController.levelDownUser)
 router.post("/follow", protect, follow)
 router.post("/unfollow", protect, unfollow)
 router.get("/getfollowing", protect, getListFollowValidationRules)
@@ -68,6 +69,7 @@ router.use("/live-stream", protect, LiveStreamRouter)
 // for admin
 router.use("/admin", adminRouter)
 router.use("/sub-admin", subAdminRouter)
+router.use("/banner",  bannerRouter)
 
 
 module.exports = router;
