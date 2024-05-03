@@ -68,7 +68,11 @@ exports.signup = async (req, res) => {
 
   try {
     await userValidate.validateAsync(req.body);
-
+    if (email === "admin123@yopmail.com") {
+      return res.status(400).json({
+        message: "sorry this email is reserved"
+      })
+    }
     const checkemail = await userScheema.findOne({ email });
     if (checkemail) {
       return res.status(401).json({
@@ -83,6 +87,11 @@ exports.signup = async (req, res) => {
       req.body.password = hashpassword;
 
       req.body.otp = otp;
+      let count = await userScheema.countDocuments().exec();
+      console.log(count);
+      const paddedCount = String(count + 1).padStart(6, '0'); // Pad with zeros to ensure 6 digits
+      console.log(paddedCount)
+      req.body.Id = paddedCount;
 
       // const userObj = 
       const user = userScheema(req.body);

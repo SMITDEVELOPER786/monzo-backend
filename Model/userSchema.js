@@ -35,6 +35,12 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "userprofiles",
   },
+  Id: {
+    type: String,
+  },
+
+
+
 })
 
 module.exports = mongoose.model("users", userSchema);
