@@ -326,3 +326,24 @@ exports.editUserInfo = async (req, res) => {
         });
     }
 }
+
+
+exports.logoutAdmin = async (req, res) => {
+    try {
+        const { headers } = req;
+        const { Authorization } = headers;
+        const token = Authorization && Authorization.split(" ")[1];
+
+        // Check if token exists
+        if (!token) {
+            return res.status(401).json({ message: "token not provided" });
+        }
+
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (e) {
+        return res.status(400).json({
+            message: "Internal Server error",
+            error: e.message,
+        });
+    }
+}

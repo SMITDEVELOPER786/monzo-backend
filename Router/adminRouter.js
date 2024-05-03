@@ -7,6 +7,7 @@ const protectAdmin = require("../AuthMiddleware/protect")
 router.post("/sub-admin/create", protectAdmin, AdminController.signup)
 router.post("/verifyOtp", AdminController.verifyOtp)
 router.post("/login", AdminController.loginAdmin)
+router.post("/logout", AdminController.logoutAdmin)
 router.get("/sub-admin/get", protectAdmin, AdminController.getAllSubAdmin)
 
 module.exports = router
