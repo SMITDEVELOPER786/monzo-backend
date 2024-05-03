@@ -3,8 +3,20 @@ const userValidate = require("../Validator/userValid.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { mail } = require("../Email/nodeMailer.js");
+const userSchema = require("../Model/userSchema.js");
+const UserProfileSchema = require("../Model/UserProfileSchema.js");
 require("dotenv").config();
 const secretkey = process.env.secret_key;
+
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+
+
 
 exports.loginAdmin = async (req, res) => {
     try {
@@ -18,11 +30,6 @@ exports.loginAdmin = async (req, res) => {
             if (!checkpassword) {
                 return res.status(400).json({
                     message: "password incorrect",
-                });
-            }
-            if (checkemail.role !== "subAdmin") {
-                return res.status(400).json({
-                    message: "login as ",
                 });
             }
             // if (!checkemail.isVerify) {
@@ -61,6 +68,7 @@ exports.loginAdmin = async (req, res) => {
         });
     }
 };
+
 exports.loginSubAdmin = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -241,5 +249,80 @@ exports.getAllSubAdmin = async (req, res) => {
         return res.status(500).json({
             message: err.message
         })
+    }
+}
+
+
+// search by ID 
+exports.searchById = async (req, res) => {
+    try {
+        const { searchId } = req.body;
+        if (!searchId) {
+            return res.status(200).json({
+                message: "enter Id to search User",
+            });
+        }
+        const searchedUser = await userSchema.findOne({ Id: searchId })
+        if (!searchedUser) {
+            return res.status(200).json({
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            message: "Searched User",
+            data: searchedUser
+        })
+    } catch (e) {
+        return res.status(400).json({
+            message: "Internal Server error",
+            error: e.message,
+        });
+    }
+};
+
+
+// edit user Info
+exports.editUserInfo = async (req, res) => {
+
+    try {
+        const { userId } = req.body;
+        // console.log(userId);
+        // console.log(req.body);
+
+        if (!userId) {
+            return res.status(400).json({
+                message: "Enter Id to edit"
+            })
+        }
+        // "email": "bilal@gmail.com",
+
+        let user = await userSchema.findOne({ _id: userId });
+        let userProf = await UserProfileSchema.findOne({ authId: userId });
+
+        const cloud = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
+        });
+
+        if (!user || !userProf) {
+            return res.status(400).json({
+                message: "User Not found"
+            })
+        }
+
+        user.set(req.body);
+        userProf.set({ ...req.body, profileImage: cloud.secure_url.split("upload/")[1], });
+
+        await user.save();
+        await userProf.save();
+        return res.status(200).json({
+            message: "User updated successfully"
+        });
+
+    } catch (e) {
+        return res.status(400).json({
+            message: "Internal Server error",
+            error: e.message,
+        });
     }
 }
