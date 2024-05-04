@@ -86,4 +86,40 @@ exports.deleteBanner = async (req, res) => {
             message: err.message
         });
     }
-} 
+}
+
+exports.updateBanner = async (req, res) => {
+    try {
+        const { category, title , bannerImg} = req.body;
+        // console.log(req.user)
+        const banner = await BannerSchema.findById(req.params.id);
+        if (!banner) {
+            return res.status(404).json({
+                message: "Banner not found"
+            });
+        }
+        // if (!category) {
+        //     return res.status(400).json({
+        //         message: "Banner category is required"
+        //     });
+        // }
+        const cloud =await cloudinary.uploader.upload(req.file.path, {
+            folder: "bannerImg"
+        })
+        console.log(cloud.secure_url)
+        banner.category = category;
+        banner.bannerTitle = title;
+        banner.bannerImg = cloud.secure_url.split("upload/")[1];
+        await banner.save();
+        
+        return res.status(200).json({
+            data: banner,
+            status: true,
+            message: "banner updated"
+        });
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+}

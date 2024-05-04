@@ -10,7 +10,6 @@ const { unfollow, follow, getListFollowValidationRules } = require("../Controlle
 const { LiveStreamController } = require("../Controller/LiveStreamController.js")
 const adminRouter = require("./adminRouter.js")
 const subAdminRouter = require("./subAdminRouter.js")
-const bannerRouter = require("./bannerRouter.js")
 
 
 const storage = multer.diskStorage({
@@ -68,7 +67,6 @@ router.use("/live-stream", protect, LiveStreamRouter)
 // for admin
 router.use("/admin", adminRouter)
 router.use("/sub-admin", subAdminRouter)
-router.use("/banner", bannerRouter)
 
 
 module.exports = router;

@@ -820,18 +820,14 @@ exports.SearchUser = async (req, res) => {
 
 // Edit Profile
 exports.editprofile = async (req, res) => {
-  const { body } = req;
-
-
   try {
-
-
+    const { body } = req;
 
     req.userId = req.user._id;
-    console.log(req.userId);
+    // console.log(req.userId);
 
     const user = await userSchema.findById(req.userId);
-
+    // console.log(user)
     if (user && user.isCompleteProfile === true) {
       // Check if user's profile is already complete
       if (req.file) {
@@ -840,7 +836,7 @@ exports.editprofile = async (req, res) => {
       const cloud = await cloudinary.uploader.upload(req.file.path, {
         folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
       });
-      console.log(cloud)
+      // console.log(cloud)
       let updateFields = {
         username: body.username || user.username,
         dateOfBirth: body.dateOfBirth || user.dateOfBirth,
@@ -869,11 +865,11 @@ exports.editprofile = async (req, res) => {
       });
     }
 
-    ;
+
   } catch (e) {
     return res.status(500).json({
       message: "Server error",
-      error: e,
+      error: e.message,
     });
   }
 };

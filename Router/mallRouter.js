@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const protectAdmin = require("../AuthMiddleware/protect")
+const { protectAdmin } = require("../AuthMiddleware/protect")
 const MallController = require("../Controller/MallController")
 const multer = require("multer");
 
@@ -18,7 +18,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/upload", protectAdmin, MallController.uploadMall)
+router.post("/upload", MallController.uploadMall)
+router.get("/get", MallController.getMall)
+router.put("/update/:id", MallController.updateMall)
+// router.post("/upload", MallController.uploadMall)
 // router.get("/get", protectAdmin, BannerController.getBanners)
 // router.post("/delete", protectAdmin, BannerController.deleteBanner)
 
