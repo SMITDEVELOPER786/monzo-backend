@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const AdminController = require("../Controller/AdminController")
-const protectAdmin = require("../AuthMiddleware/protect")
+const { protectAdmin } = require("../AuthMiddleware/protect")
 
 
 router.post("/sub-admin/create", protectAdmin, AdminController.signup)

@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const protectAdmin = require("../AuthMiddleware/protect")
+const { protectAdmin } = require("../AuthMiddleware/protect")
 const BannerController = require("../Controller/BannerController")
 const multer = require("multer");
 

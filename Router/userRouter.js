@@ -3,7 +3,7 @@ const messageController = require("../Controller/messageController.js")
 const router = exp.Router()
 const userController = require("../Controller/userController.js")
 const multer = require("multer")
-const protect = require("../AuthMiddleware/protect.js")
+const { protect } = require("../AuthMiddleware/protect.js")
 const reelRouter = require("./reelRouter.js")
 const LiveStreamRouter = require("./LiveStreamRouter.js")
 const { unfollow, follow, getListFollowValidationRules } = require("../Controller/FollowController.js")
@@ -37,7 +37,6 @@ router.post("/completeprofile", protect, upload.single("profileImage"), userCont
 // router.post("/forgetpassword",protect,userController.forgotPassword)
 // router.post('/change-password', protect, userController.PasswordOtpVerify);
 // router.post("/verify-otp", userController.verifyOtp)
-// router.post("/completeprofile", upload.single("profileImage"), protect, userController.completeProfile)
 router.post("/forgetpassword", userController.forgotPassword)
 router.post("/verify-forget-otp", userController.VerifyForgetOTP)
 router.post('/change-password', protect, userController.PasswordOtpVerify);
@@ -69,7 +68,7 @@ router.use("/live-stream", protect, LiveStreamRouter)
 // for admin
 router.use("/admin", adminRouter)
 router.use("/sub-admin", subAdminRouter)
-router.use("/banner",  bannerRouter)
+router.use("/banner", bannerRouter)
 
 
 module.exports = router;

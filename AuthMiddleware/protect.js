@@ -89,6 +89,11 @@ const protectSubAdmin = asyncHandler(async (req, res, next) => {
   }
 })
 
-module.exports = protect;
-module.exports = protectAdmin;
-module.exports = protectSubAdmin;
+// module.exports = protect;
+// module.exports = protectAdmin;
+// module.exports = protectSubAdmin;
+module.exports = {
+  protect,
+  protectAdmin,
+  protectSubAdmin
+};

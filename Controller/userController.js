@@ -540,7 +540,7 @@ exports.completeProfile = async (req, res) => {
       });
     }
 
-    ;
+
   } catch (e) {
     return res.status(500).json({
       message: "Server error",
@@ -837,19 +837,22 @@ exports.editprofile = async (req, res) => {
       if (req.file) {
         body.profileImage = req.file.path;
       }
-
+      const cloud = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
+      });
+      console.log(cloud)
       let updateFields = {
         username: body.username || user.username,
         dateOfBirth: body.dateOfBirth || user.dateOfBirth,
         gender: body.gender || user.gender,
         favBroadcaster: body.favBroadcaster || user.favBroadcaster,
-        profileImage: body.profileImage || user.profileImage,
+        profileImage: cloud.secure_url.split("upload/")[1],
         bio: body.bio || user.bio,
       };
 
-      if (req.file) {
-        updateFields.profileImage = body.profileImage;
-      }
+      // if (req.file) {
+      //   updateFields.profileImage = body.profileImage;
+      // }
 
       await userprofileSchema.findOneAndUpdate(
         { authId: req.userId },
