@@ -21,6 +21,11 @@ const upload = multer({ storage: storage });
 router.post("/upload", MallController.uploadMall)
 router.get("/get", MallController.getMall)
 router.put("/update/:id", MallController.updateMall)
+router.delete("/delete/:id", MallController.deleteMall)
+// delete ki api rhti hai
+
+
+
 // router.post("/upload", MallController.uploadMall)
 // router.get("/get", protectAdmin, BannerController.getBanners)
 // router.post("/delete", protectAdmin, BannerController.deleteBanner)

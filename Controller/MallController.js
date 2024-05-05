@@ -58,3 +58,24 @@ exports.updateMall = async (req, res) => {
         })
     }
 }
+
+
+exports.deleteMall = async (req, res) => {
+    try {
+        const mall = await MallSchema.findById(req.params.id);
+        if (!mall) {
+            return res.status(400).json({
+                message: "Mall Not Found"
+            })
+        }
+        await mall.deleteOne({ _id: req.body.params });
+        return res.status(200).json({
+            message: "Mall deleted successfully",
+            data: mall
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}

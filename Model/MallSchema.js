@@ -10,7 +10,7 @@ const MallSchema = new mongoose.Schema({
         required: true
     },
     mallCoin: {
-        type: String,
+        type: Number,
         required: true
     },
 
