@@ -4,6 +4,7 @@ const AdminController = require("../Controller/AdminController")
 const { protectAdmin } = require("../AuthMiddleware/protect")
 const bannerRouter = require("./bannerRouter.js")
 const mallRouter = require("./mallRouter.js")
+const customIdRouter = require("./customIdRouter.js")
 
 
 router.post("/sub-admin/create", protectAdmin, AdminController.signup)
@@ -16,6 +17,8 @@ router.get("/sub-admin/get", protectAdmin, AdminController.getAllSubAdmin)
 router.use("/banner", bannerRouter)
 // mall router
 router.use("/mall", protectAdmin, mallRouter)
+// customId
+router.use("/customId", protectAdmin, customIdRouter)
 
 
 
