@@ -46,7 +46,7 @@ exports.loginAdmin = async (req, res) => {
             // }
             // else {
             const token = jwt.sign({ userId: checkemail._id }, secretkey, {
-                expiresIn: "4h",
+                expiresIn: "24h",
             });
 
             console.log(token);

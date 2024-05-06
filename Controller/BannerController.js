@@ -69,14 +69,14 @@ exports.getBanners = async (req, res) => {
 
 exports.deleteBanner = async (req, res) => {
     try {
-        const { bannerId } = req.body
-        const banner = await BannerSchema.findById({ _id: bannerId });
+     
+        const banner = await BannerSchema.findById(req.params.id);
         if (!banner) {
             return res.status(404).json({
                 message: "Banner not found"
             });
         }
-        await banner.deleteOne({ _id: bannerId })
+        await banner.deleteOne({ _id: req.body.params })
         return res.status(200).json({
             message: "Banner deleted successfully",
             status: true
