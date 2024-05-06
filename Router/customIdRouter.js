@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { protectAdmin } = require("../AuthMiddleware/protect")
+// const { protectAdmin } = require("../AuthMiddleware/protect")
 const CustomIdController = require("../Controller/CustomIdController")
 
 router.post("/generate", CustomIdController.generateCustomId)
@@ -11,4 +11,4 @@ router.delete("/delete/:id", CustomIdController.DeleteCustomId)
 // router.put("/update/:id", protectAdmin, upload.single("bannerImg"), BannerController.updateBanner)
 // router.post("/delete", protectAdmin, BannerController.deleteBanner)
 
-module.exports = router
+module.exports = router;
