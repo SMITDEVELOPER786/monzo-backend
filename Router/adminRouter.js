@@ -8,6 +8,7 @@ const mallRouter = require("./mallRouter.js");
 const CustomIdRouter = require("./CustomIdRouter.js");
 
 const vipRouter = require("./vipRouter.js");
+const giftRouter = require("./giftRouter.js");
 
 
 router.post("/sub-admin/create", protectAdmin, AdminController.signup)
@@ -24,6 +25,8 @@ router.use("/mall", protectAdmin, mallRouter)
 router.use("/customId", protectAdmin, CustomIdRouter)
 // make vip
 router.use("/vip", protectAdmin, vipRouter)
+// gift
+router.use("/gift", protectAdmin, giftRouter)
 
 
 

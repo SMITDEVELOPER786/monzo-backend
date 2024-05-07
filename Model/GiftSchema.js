@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const GiftSchema = new mongoose.Schema({
     senderId: {
-        type: Schema.Types.ObjectId, ref: "users",
+        type: mongoose.Schema.Types.ObjectId, ref: "users",
         required: true
     },
     recieverId: {
-        type: Schema.Types.ObjectId, ref: "users",
+        type: mongoose.Schema.Types.ObjectId, ref: "users",
         required: true
     },
     giftImg: {
