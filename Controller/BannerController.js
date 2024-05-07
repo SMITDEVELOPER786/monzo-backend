@@ -98,11 +98,7 @@ exports.updateBanner = async (req, res) => {
                 message: "Banner not found"
             });
         }
-        // if (!category) {
-        //     return res.status(400).json({
-        //         message: "Banner category is required"
-        //     });
-        // }
+
         const cloud =await cloudinary.uploader.upload(req.file.path, {
             folder: "bannerImg"
         })

@@ -58,7 +58,6 @@ router.get("/chat", messageController.getMessages)
 router.get("/get-followers", userController.getFollowersUsers)
 router.get("/get-broadcaster", userController.getAllBroadCasters)
 router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
-// router.post("/live-stream", protect, LiveStreamController)
 
 
 router.use("/reel", reelRouter)

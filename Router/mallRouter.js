@@ -26,8 +26,6 @@ router.delete("/delete/:id", MallController.deleteMall)
 
 
 
-// router.post("/upload", MallController.uploadMall)
-// router.get("/get", protectAdmin, BannerController.getBanners)
-// router.post("/delete", protectAdmin, BannerController.deleteBanner)
+
 
 module.exports = router

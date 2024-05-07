@@ -2,7 +2,6 @@ const exp = require("express");
 const { getAllLiveStreams, CreateLiveStreamController, joinLiveStream, EndLiveStream } = require("../Controller/LiveStreamController");
 const router = exp.Router();
 
-// router.post("/create-live-stream", auth, CreateLiveStreamController)
 router.route("/get").get(getAllLiveStreams);
 router.route("/create").post(CreateLiveStreamController);
 router.route("/join").post(joinLiveStream);
