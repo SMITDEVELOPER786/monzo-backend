@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 // const { protectAdmin } = require("../AuthMiddleware/protect")
-const CustomIdController = require("../Controller/CustomIdController")
+const CustomIdController = require("../Controller/CustomIdController.js")
 
 router.post("/generate", CustomIdController.generateCustomId)
 router.get("/get", CustomIdController.getCustomId)
