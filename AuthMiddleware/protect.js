@@ -66,7 +66,7 @@ const protectSubAdmin = asyncHandler(async (req, res, next) => {
     const token = req.headers.authorization && req.headers.authorization.split(" ")[1]; // Check if authorization header exists
     if (!token) {
       res.status(402);
-      throw new Error("Not Authorized, please login as admin");
+      throw new Error("Not Authorized, please login as sub admin");
     }
 
     const verify = jwt.verify(token, process.env.secret_key)
