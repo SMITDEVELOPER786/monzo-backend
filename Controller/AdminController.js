@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const { mail } = require("../Email/nodeMailer.js");
 const userSchema = require("../Model/userSchema.js");
 const UserProfileSchema = require("../Model/UserProfileSchema.js");
+const bgImgSchema = require("../Model/bgImgSchema.js");
 require("dotenv").config();
 const secretkey = process.env.secret_key;
 
@@ -252,6 +253,39 @@ exports.getAllSubAdmin = async (req, res) => {
     }
 }
 
+// delete sub admin
+exports.deleteSubAdmin = async (req, res) => {
+    try {
+        const subAdminId = req.params.id;
+        if (!subAdminId) {
+            return res.status(400).json({
+                message: "sub admin ID not found"
+            })
+        }
+        const subAdmin = await AdminSchema.findById(subAdminId);
+
+        if (!subAdmin) {
+            return res.status(404).json({
+                error: "Sub-admin not found"
+            });
+        }
+
+        if (subAdmin.role !== "subAdmin") {
+            return res.status(422).json({
+                error: "Invalid sub-admin ID provided"
+            });
+        }
+
+        await subAdmin.deleteOne({});
+        return res.status(200).json({
+            message: "Sub admin deleted successfully"
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
 
 // search by ID 
 exports.searchById = async (req, res) => {
@@ -299,7 +333,7 @@ exports.editUserInfo = async (req, res) => {
 
         let user = await userSchema.findOne({ _id: userId });
         let userProf = await UserProfileSchema.findOne({ authId: userId });
-        
+
         // console.log(req?.file)
         const cloud = await cloudinary.uploader.upload(req?.file?.path, {
             folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
@@ -341,6 +375,68 @@ exports.logoutAdmin = async (req, res) => {
         }
 
         res.status(200).json({ message: "Logged out successfully" });
+    } catch (e) {
+        return res.status(400).json({
+            message: "Internal Server error",
+            error: e.message,
+        });
+    }
+}
+
+
+// upload background
+exports.uploadBackground = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                message: "image not found"
+            })
+        }
+        const cloud = await cloudinary.uploader.upload(req.file.path, {
+            folder: "bgImg"
+        })
+        const bgImg = cloud.secure_url.split("upload/")[1];
+        console.log(bgImg)
+        const data = await bgImgSchema({ bgImg }).save();
+        return res.status(200).json({
+            data,
+            message: "background Image uploaded"
+        })
+    } catch (e) {
+        return res.status(400).json({
+            message: "Internal Server error",
+            error: e.message,
+        });
+    }
+}
+
+// edit background 
+exports.updateBackground = async (req, res) => {
+    try {
+        const imgId = req.params.id;
+        if (!req.file) {
+            return res.status(400).json({
+                message: "image not found"
+            })
+        }
+        const checkImg = await bgImgSchema.findById({ _id: imgId });
+        if (!checkImg) {
+            return res.status(400).json({
+                message: "background image not found"
+            })
+        }
+        const cloud = await cloudinary.uploader.upload(req.file.path, {
+            folder: "bgImg"
+        })
+        const bgImg = cloud.secure_url.split("upload/")[1];
+        console.log(bgImg)
+        // Update the document with the new background image URL
+        const updatedImg = await bgImgSchema.findByIdAndUpdate(imgId, { bgImg });
+
+        return res.status(200).json({
+            updatedImg,
+            message: "background Image uploaded"
+        })
     } catch (e) {
         return res.status(400).json({
             message: "Internal Server error",
