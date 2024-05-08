@@ -20,8 +20,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-// router.post("/signup", AdminController.signup)
-// router.post("/verifyOtp", AdminController.verifyOtp)
+
 router.post("/login", AdminController.loginSubAdmin)
 router.post("/ban-user", protectSubAdmin, userController.banUser)
 router.post("/unban-user", protectSubAdmin, userController.unBanUser)

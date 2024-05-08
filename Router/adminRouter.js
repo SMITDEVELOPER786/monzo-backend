@@ -5,7 +5,7 @@ const { protectAdmin } = require("../AuthMiddleware/protect");
 const bannerRouter = require("./bannerRouter.js");
 const mallRouter = require("./mallRouter.js");
 // const customIdRouter = require("./customIdRouter.js");
-const CustomIdRouter = require("./CustomIdRouter.js");
+const CustomIdRouter = require("./customIdRouter.js");
 
 const vipRouter = require("./vipRouter.js");
 const giftRouter = require("./giftRouter.js");

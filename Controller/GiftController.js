@@ -47,7 +47,6 @@ exports.sendGift = async (req, res) => {
         req.body.giftImg = cloud.secure_url.split("upload/")[1],
             await GiftSchema(req.body).save();
 
-        // console.log(senderUser);
         return res.status(200).json({
             message: "Gift sent succesfully"
         })
