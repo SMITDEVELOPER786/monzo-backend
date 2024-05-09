@@ -1,5 +1,43 @@
 const LiveStreamSchema = require("../Model/LiveStreamSchema");
 const UserProfileSchema = require("../Model/UserProfileSchema");
+const userSchema = require("../Model/userSchema");
+
+// -------- function to gat all streams
+const getStreamFunc = async () => {
+    const data = await LiveStreamSchema.aggregate([
+        { $match: { isdelete: false } },
+        {
+            $lookup: {
+                let: { id: "$hostId" },
+                from: "userprofiles",
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: { $eq: ["$authId", "$$id"] }
+                            }
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 0, // Exclude unnecessary document ID
+                            profileImage: 1
+                        }
+                    }
+                ],
+
+                as: "profileImage"
+            }
+        },
+        {
+            $addFields: {
+                profileImage: { $arrayElemAt: ["$profileImage.profileImage", 0] }
+            }
+        },
+    ]);
+    return data
+}
+
 
 exports.CreateLiveStreamController = async (req, res) => {
     try {
@@ -91,38 +129,7 @@ exports.CreateLiveStreamController = async (req, res) => {
 
 exports.getAllLiveStreams = async (req, res) => {
     try {
-        const data = await LiveStreamSchema.aggregate([
-            { $match: { isdelete: false } },
-            {
-                $lookup: {
-                    let: { id: "$hostId" },
-                    from: "userprofiles",
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: { $eq: ["$authId", "$$id"] }
-                                }
-                            }
-                        },
-                        {
-                            $project: {
-                                _id: 0, // Exclude unnecessary document ID
-                                profileImage: 1
-                            }
-                        }
-                    ],
-
-                    as: "profileImage" 
-                }
-            },
-            {
-                $addFields: {
-                    profileImage: { $arrayElemAt: ["$profileImage.profileImage", 0] }
-                }
-            },
-        ]);
-
+        const data = await getStreamFunc();
         return res.status(200).json({
             data: data,
             length: data.length,
@@ -205,6 +212,27 @@ exports.EndLiveStream = async (req, res) => {
             message: "Stream ended successfully"
         })
 
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+            status: false
+        })
+    }
+}
+
+exports.getPopularStreams = async (req, res) => {
+    try {
+        const user = await userSchema.findById({ _id: req.user.id });
+        
+        const data = await getStreamFunc();
+        const popularStream = data.filter((stream) => stream.country === user.country);
+        // console.log(popularStream)
+        return res.status(200).json({
+            data: popularStream,
+            length: popularStream.length,
+            status: true
+            // stream:data
+        })
     } catch (err) {
         return res.status(500).json({
             message: err.message,

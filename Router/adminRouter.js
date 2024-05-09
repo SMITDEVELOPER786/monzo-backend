@@ -9,6 +9,9 @@ const CustomIdRouter = require("./customIdRouter.js");
 
 const vipRouter = require("./vipRouter.js");
 const giftRouter = require("./giftRouter.js");
+// const agencyRouter = require("./agencyRouter.js");
+const AgencyController = require("../Controller/agencyController")
+
 
 const multer = require("multer")
 
@@ -38,6 +41,12 @@ router.delete("/sub-admin/delete/:id", protectAdmin, AdminController.deleteSubAd
 
 router.post("/bgImg/upload", protectAdmin, upload.single("bgImg"), AdminController.uploadBackground)
 router.put("/bgImg/update/:id", protectAdmin, upload.single("bgImg"), AdminController.updateBackground)
+
+// agency
+router.post("/agency/accept", protectAdmin, AgencyController.acceptAgencyReq)
+router.post("/agency/reject", protectAdmin, AgencyController.rejectAgencyReq)
+
+
 
 // banner 
 router.use("/banner", bannerRouter)

@@ -65,16 +65,23 @@ exports.sendOtp = async (req, res) => {
 
 // Signup
 exports.signup = async (req, res) => {
-  const { email, password } = req.body;
 
+  const { email, password, country } = req.body;
   try {
-    await userValidate.validateAsync(req.body);
+
+    if (!email || !password || !country) {
+      return res.status(400).json({
+        message: "email , password & country are required"
+      })
+    }
+    console.log(country)
+    await userValidate.validateAsync({ email, password });
     if (email === "admin123@yopmail.com") {
       return res.status(400).json({
         message: "sorry this email is reserved"
       })
     }
-    const checkemail = await userScheema.findOne({ email });
+    const checkemail = await userSchema.findOne({ email });
     if (checkemail) {
       return res.status(401).json({
         message: "User AlReady Register",

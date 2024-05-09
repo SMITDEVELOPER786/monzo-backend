@@ -10,6 +10,7 @@ const { unfollow, follow, getListFollowValidationRules } = require("../Controlle
 const { LiveStreamController } = require("../Controller/LiveStreamController.js")
 const adminRouter = require("./adminRouter.js")
 const subAdminRouter = require("./subAdminRouter.js")
+const agencyRouter = require("./agencyRouter.js");
 
 
 const storage = multer.diskStorage({
@@ -60,8 +61,9 @@ router.get("/get-broadcaster", userController.getAllBroadCasters)
 router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
 
 
-router.use("/reel", reelRouter)
-router.use("/live-stream", protect, LiveStreamRouter)
+router.use("/reel", reelRouter);
+router.use("/live-stream", protect, LiveStreamRouter);
+router.use("/agency", protect, agencyRouter);
 
 // for admin
 router.use("/admin", adminRouter)

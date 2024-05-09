@@ -1,14 +1,14 @@
 const MallSchema = require("../Model/MallSchema");
 
-require("dotenv").config();
-const secretkey = process.env.secret_key;
+// require("dotenv").config();
+// const secretkey = process.env.secret_key;
 
-const cloudinary = require('cloudinary').v2;
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// const cloudinary = require('cloudinary').v2;
+// cloudinary.config({
+//     cloud_name: process.env.CLOUDINARY_NAME,
+//     api_key: process.env.CLOUDINARY_API_KEY,
+//     api_secret: process.env.CLOUDINARY_API_SECRET
+// });
 
 exports.uploadMall = async (req, res) => {
     try {
@@ -18,16 +18,16 @@ exports.uploadMall = async (req, res) => {
                 message: "mallCoin , mallName & itemCategory is required"
             })
         }
-        if (!req.file) {
-            return res.status(404).json({
-                message: "image not found"
-            })
-        }
-        console.log(req.file)
-        const cloud = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'mallImg', // Set the folder where the image will be stored in Cloudinary
-        });
-        req.body.mallImg = cloud.secure_url.split("upload/")[1]
+        // if (!req.file) {
+        //     return res.status(404).json({
+        //         message: "image not found"
+        //     })
+        // }
+        // console.log(req.file)
+        // const cloud = await cloudinary.uploader.upload(req.file.path, {
+        //     folder: 'mallImg', // Set the folder where the image will be stored in Cloudinary
+        // });
+        // req.body.mallImg = cloud.secure_url.split("upload/")[1]
         const mall = await MallSchema(req.body).save();
 
         return res.status(200).json({

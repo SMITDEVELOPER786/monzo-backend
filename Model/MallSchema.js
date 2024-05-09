@@ -13,10 +13,10 @@ const MallSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    mallImg: {
-        type: String,
-        required: true
-    },
+    // mallImg: {
+    //     type: String,
+    //     required: true
+    // },
 
 
 
