@@ -387,6 +387,7 @@ exports.logoutAdmin = async (req, res) => {
 // upload background
 exports.uploadBackground = async (req, res) => {
     try {
+
         if (!req.file) {
             return res.status(400).json({
                 message: "image not found"
@@ -396,7 +397,17 @@ exports.uploadBackground = async (req, res) => {
             folder: "bgImg"
         })
         const bgImg = cloud.secure_url.split("upload/")[1];
-        console.log(bgImg)
+        // console.log(bgImg)
+        const checkBgImg = await bgImgSchema.find({});
+        console.log(checkBgImg._id)
+        if (checkBgImg.length > 0) {
+            // checkBgImg.bgImg = bgImg;
+            await bgImgSchema.findByIdAndUpdate({ _id: checkBgImg[0]._id }, { bgImg });
+            return res.status(200).json({
+                checkBgImg,
+                message: "background Image uploaded"
+            })
+        }
         const data = await bgImgSchema({ bgImg }).save();
         return res.status(200).json({
             data,
