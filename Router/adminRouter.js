@@ -10,7 +10,7 @@ const CustomIdRouter = require("./customIdRouter.js");
 const vipRouter = require("./vipRouter.js");
 const giftRouter = require("./giftRouter.js");
 // const agencyRouter = require("./agencyRouter.js");
-const AgencyController = require("../Controller/agencyController")
+const AgencyController = require("../Controller/AgencyController.js")
 
 
 const multer = require("multer")
