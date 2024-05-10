@@ -649,7 +649,8 @@ exports.getAllUser = async (req, res) => {
     if (user) {
       return res.status(200).json({
         message: "user all users",
-        data: user
+        data: user,
+        length: user.length
       });
     }
   } catch (e) {
@@ -803,22 +804,84 @@ exports.getAllUser = async (req, res) => {
 //SearchUser
 exports.SearchUser = async (req, res) => {
   try {
-    const searchTerm = req.body.name; // Assuming query parameter name is used
+    const { name } = req.body; // Assuming query parameter name is used
 
-    console.log(searchTerm);
-    const data = await userprofileSchema.find({
-      $or: [
-        {
-          username: {
-            $regex: new RegExp(searchTerm, "i"), // Case-insensitive search
+    console.log(name);
+    // const data = await userprofileSchema.find({
+    //   $or: [
+    //     {
+    //       username: {
+    //         $regex: new RegExp(name, "i"), // Case-insensitive search
+    //       },
+    //     },
+    //   ],
+    // });
+
+
+    var data = await userprofileSchema.aggregate([
+      {
+        $match: {
+          $or: [
+            {
+              username: {
+                $regex: new RegExp(name, "i"), // Case-insensitive search
+              },
+            },
+            // You can add more conditions here for the aggregation pipeline
+          ],
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: "$authId" },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $and: { $eq: ["$_id", "$$id"] }
+              }
+            }
           },
-        },
-      ],
-    });
+          ],
+          as: "User"
+        }
+      },
+      {
+        $lookup: {
+          from: "userprofiles",
+          let: { id: "$_id" },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $and: { $eq: ["$_id", "$$id"] }
+              }
+            }
+          },
+          ],
+          as: "UserProf"
+        }
+      },
+      {
+        $project: {
+          isBan: { $arrayElemAt: ["$UserProf.isBan", 0] },
+          banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
+          isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
+          username: { $arrayElemAt: ["$UserProf.username", 0] },
+          dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
+          profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
+          gender: { $arrayElemAt: ["$UserProf.gender", 0] },
+          isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
+          Id: { $arrayElemAt: ["$User.Id", 0] },
+          // username: { $arrayElemAt: ["$UserProf.username", 0] },
+        }
+      }
+    ]);
 
-    console.log(data);
+
+    // console.log(data);
     return res.status(200).json({
       data,
+      length: data.length
     });
   } catch (error) {
     return res.status(500).json({
@@ -827,6 +890,83 @@ exports.SearchUser = async (req, res) => {
     });
   }
 };
+
+// search user by ID
+exports.searchByID = async (req, res) => {
+  try {
+    const { id } = req.body
+    var data = await userSchema.aggregate([
+      {
+
+        $match: {
+          $or: [
+            {
+              Id: {
+                $regex: new RegExp(id, "i"), // Case-insensitive search
+              },
+            },
+            // You can add more conditions here for the aggregation pipeline
+          ],
+        }
+
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: "$_id" },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $and: { $eq: ["$_id", "$$id"] }
+              }
+            }
+          },
+          ],
+          as: "User"
+        }
+      },
+      {
+        $lookup: {
+          from: "userprofiles",
+          let: { id: "$_id" },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $and: { $eq: ["$authId", "$$id"] }
+              }
+            }
+          },
+          ],
+          as: "UserProf"
+        }
+      },
+      {
+        $project: {
+          isBan: { $arrayElemAt: ["$UserProf.isBan", 0] },
+          banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
+          isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
+          username: { $arrayElemAt: ["$UserProf.username", 0] },
+          dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
+          profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
+          gender: { $arrayElemAt: ["$UserProf.gender", 0] },
+          isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
+          Id: { $arrayElemAt: ["$User.Id", 0] },
+          // username: { $arrayElemAt: ["$UserProf.username", 0] },
+        }
+      }
+    ]);
+
+    return res.status(200).json({
+      data
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
 
 // Edit Profile
 exports.editprofile = async (req, res) => {
