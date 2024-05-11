@@ -37,6 +37,20 @@ exports.createAgency = async (req, res) => {
     }
 }
 
+exports.getAgency = async (req, res) => {
+    try {
+        const data = await AgencySchema.find()
+        return res.status(200).json({
+            data
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+
 exports.acceptAgencyReq = async (req, res) => {
     try {
         const { agencyId } = req.body;
