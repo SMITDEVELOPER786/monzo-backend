@@ -60,7 +60,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: countries
   },
+  tag: {
+    type: String
 
+  }
 
 })
 

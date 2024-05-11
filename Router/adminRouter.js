@@ -11,6 +11,7 @@ const vipRouter = require("./vipRouter.js");
 const giftRouter = require("./giftRouter.js");
 // const agencyRouter = require("./agencyRouter.js");
 const AgencyController = require("../Controller/AgencyController.js")
+const TagController = require("../Controller/TagController.js")
 
 
 const multer = require("multer")
@@ -46,6 +47,9 @@ router.put("/bgImg/update/:id", protectAdmin, upload.single("bgImg"), AdminContr
 router.post("/agency/accept", protectAdmin, AgencyController.acceptAgencyReq)
 router.post("/agency/reject", protectAdmin, AgencyController.rejectAgencyReq)
 router.get("/agency/get", protectAdmin, AgencyController.getAgency)
+
+// assign tag or model
+router.post("/tag/add", protectAdmin, TagController.addUserTag)
 
 
 
