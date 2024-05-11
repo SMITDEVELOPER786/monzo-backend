@@ -59,7 +59,12 @@ exports.acceptAgencyReq = async (req, res) => {
                 message: "agency Id is required"
             })
         }
-        const data = await AgencySchema.findOneAndUpdate({ _id: agencyId }, { status: "accepted" })
+        const data = await AgencySchema.findOneAndUpdate({ _id: agencyId }, { $set: { status: "accepted" } });
+        if (!data) {
+            return res.status(404).json({
+                message: "agency not found"
+            })
+        }
         return res.status(200).json({
             message: "agency request accepted successfully"
         })
@@ -78,7 +83,17 @@ exports.rejectAgencyReq = async (req, res) => {
                 message: "agency Id is required"
             })
         }
-        const data = await AgencySchema.findOneAndUpdate({ _id: agencyId }, { status: "rejected" })
+        const data = await AgencySchema.findOneAndUpdate(
+            { _id: agencyId }, // Filter to find the agency by its ID
+            { $set: { status: "rejected" } },
+            // { new: true } // Return the updated document
+        );
+        if (!data) {
+            return res.status(404).json({
+                message: "agency not found"
+            })
+        }
+
         return res.status(200).json({
             message: "agency request declined successfully"
         })
