@@ -14,7 +14,7 @@ exports.addUserTag = async (req, res) => {
                 message: "User not found"
             })
         }
-        return res.status(400).json({
+        return res.status(200).json({
             message: "Tag added successfully"
         })
     } catch (err) {
