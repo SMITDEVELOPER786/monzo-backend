@@ -11,7 +11,7 @@ const { LiveStreamController } = require("../Controller/LiveStreamController.js"
 const adminRouter = require("./adminRouter.js")
 const subAdminRouter = require("./subAdminRouter.js")
 const agencyRouter = require("./agencyRouter.js");
-
+const BannerController = require("../Controller/BannerController")
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -59,6 +59,7 @@ router.post("/search-id", userController.searchByID)
 router.get("/chat", messageController.getMessages)
 router.get("/get-followers", userController.getFollowersUsers)
 router.get("/get-broadcaster", userController.getAllBroadCasters)
+router.get("/get-banner", BannerController.getBanners)
 router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
 
 
