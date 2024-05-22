@@ -23,3 +23,18 @@ exports.addUserTag = async (req, res) => {
         })
     }
 }
+
+exports.getAssignTags = async (req, res) => {
+    try {
+        const data = await userSchema.find({ tag: { $exists: true, $ne: null, $ne: "" } });
+    
+        return res.status(200).json({
+            data,
+            length: data.length
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}

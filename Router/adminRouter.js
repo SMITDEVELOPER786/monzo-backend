@@ -9,6 +9,7 @@ const CustomIdRouter = require("./customIdRouter.js");
 
 const vipRouter = require("./vipRouter.js");
 const giftRouter = require("./giftRouter.js");
+const coinRouter = require("./coinRouter.js");
 // const agencyRouter = require("./agencyRouter.js");
 const AgencyController = require("../Controller/AgencyController.js")
 const TagController = require("../Controller/TagController.js")
@@ -50,6 +51,9 @@ router.get("/agency/get", protectAdmin, AgencyController.getAgency)
 
 // assign tag or model
 router.post("/tag/add", protectAdmin, TagController.addUserTag)
+router.get("/tag/", protectAdmin, TagController.getAssignTags)
+
+
 
 
 
@@ -63,6 +67,8 @@ router.use("/customId", protectAdmin, CustomIdRouter)
 router.use("/vip", protectAdmin, vipRouter)
 // gift
 router.use("/gift", protectAdmin, giftRouter)
+// master coins
+router.use("/coins", protectAdmin, coinRouter)
 
 
 
