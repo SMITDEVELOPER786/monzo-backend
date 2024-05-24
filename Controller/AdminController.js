@@ -455,3 +455,48 @@ exports.updateBackground = async (req, res) => {
         });
     }
 }
+
+// admin change info form
+exports.changeInfoForm = async (req, res) => {
+    try {
+        const { username, email, userId } = req.body;
+        if (!userId) {
+            return res.status(400).json({
+                message: "User id is required"
+            })
+        }
+        if (!username) {
+            return res.status(400).json({
+                message: "User name is required"
+            })
+        }
+
+        const user = await userSchema.findOneAndUpdate({ Id: userId }, req.body);
+        const userProf = await UserProfileSchema.findOneAndUpdate({ authId: user?._id }, req.body);
+        // console.log(user, userProf)
+        if (!user || !userProf) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+
+        if (req.file) {
+            const cloud = await cloudinary.uploader.upload(req.file.path, {
+                folder: "profileImage"
+            });
+            req.body.profileImage = await cloud.secure_url.split("/upload")[1]
+        }
+
+        // await user.set(req.body);
+        // await userProf.set(req.body);
+        return res.status(200).json({
+            message: "User info updated"
+        })
+
+    } catch (e) {
+        return res.status(400).json({
+            message: "Internal Server error",
+            error: e.message,
+        });
+    }
+}
