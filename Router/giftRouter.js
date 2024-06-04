@@ -18,7 +18,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/send", protectAdmin, upload.single("giftImg"), GiftController.sendGift)
+router.post("/upload", upload.single("giftImg"), GiftController.uploadGift)
+// router.post("/send", GiftController.sendGift)
 router.get("/get", protectAdmin, GiftController.getGifts)
 
 

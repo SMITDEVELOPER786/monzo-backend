@@ -11,6 +11,30 @@ cloudinary.config({
 });
 
 
+exports.uploadGift = async (req, res) => {
+    try {
+        const { giftCategory, giftValue } = req.body;
+        if (!giftCategory || !req.file || !giftValue) {
+            return res.status(404).json({
+                message: "giftCategory , gift image & giftValue is required"
+            })
+        }
+        const cloud = await cloudinary.uploader.upload(req.file.path, {
+            folder: "giftImg"
+        })
+        req.body.giftImg = cloud.secure_url.split("upload/")[1],
+        await GiftSchema(req.body).save();
+        return res.status(200).json({
+            message: "Gift added succesfully"
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
 exports.sendGift = async (req, res) => {
     try {
         const { senderId, recieverId } = req.body;
