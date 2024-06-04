@@ -103,3 +103,32 @@ exports.rejectAgencyReq = async (req, res) => {
         })
     }
 }
+
+exports.agencyChngeInfo = async (req, res) => {
+    try {
+        const { phone, agencyId } = req.body;
+        if (!phone || !req.file || !agencyId)
+            return res.status(404).json({
+                message: "Phone Number or agencyImg or agencyId not found"
+            })
+        const agency = await AgencySchema.findOne({ _id: agencyId })
+        if (!agency)
+            return res.status(404).json({
+                message: "Agency not found"
+            })
+        const cloud = await cloudinary.uploader.upload(req.file.path, {
+            folder: "agencyImg"
+        })
+        req.body.agencyImg = cloud.secure_url.split("upload/")[1]
+
+
+        await AgencySchema.findOneAndUpdate({ _id: agencyId }, req.body)
+        return res.status(200).json({
+            message: "Agency Form updated...!"
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
