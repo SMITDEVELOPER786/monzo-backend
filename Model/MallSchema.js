@@ -3,20 +3,20 @@ const { default: mongoose } = require("mongoose");
 const MallSchema = new mongoose.Schema({
     itemCategory: {
         type: String,
-        required: true
+        // required: true
     },
     mallName: {
         type: String,
-        required: true
+        // required: true
     },
     mallCoin: {
         type: Number,
-        required: true
+        // required: true
     },
-    // mallImg: {
-    //     type: String,
-    //     required: true
-    // },
+    mallImg: {
+        type: String,
+        // required: true
+    },
 
 
 

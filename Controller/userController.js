@@ -635,6 +635,7 @@ exports.getAllUser = async (req, res) => {
           isBan: { $arrayElemAt: ["$UserProf.isBan", 0] },
           banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
           isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
+          isReseller: { $arrayElemAt: ["$User.isReseller", 0] },
           username: { $arrayElemAt: ["$UserProf.username", 0] },
           dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
           profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
@@ -1380,6 +1381,27 @@ exports.levelDownUser = async (req, res) => {
       message: `user level down to ${user.isLevel}`
     })
 
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message,
+      status: false
+    })
+  }
+}
+
+exports.makeUserReseller = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await userSchema.findById({ _id: userId });
+    if (!user)
+      return res.status(404).json({
+        message: "user not found"
+      });
+    user.isReseller = true;
+    await user.save();
+    return res.status(200).json({
+      message: "User updated to reseller successfully"
+    });
   } catch (err) {
     return res.status(500).json({
       message: err.message,

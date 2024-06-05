@@ -55,7 +55,7 @@ router.post("/tag/add", protectAdmin, TagController.addUserTag)
 router.get("/tag/", protectAdmin, TagController.getAssignTags)
 
 
-router.post("/change/userInfo", protectAdmin, upload.single("profileImage"), AdminController.changeInfoForm)
+router.put("/change/userInfo", protectAdmin, upload.single("profileImage"), AdminController.changeInfoForm)
 
 
 

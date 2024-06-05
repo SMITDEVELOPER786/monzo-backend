@@ -10,6 +10,7 @@ exports.transferCoins = async (req, res) => {
         if (!coins) return res.status(404).json({
             message: "coins amount is required"
         })
+        coins = parseInt(coins)
         const findAlready = await CoinSchema.findOne({ userId });
         if (findAlready) {
             console.log("coins", coins + findAlready.coins)
@@ -55,6 +56,8 @@ exports.coinHistoryChecker = async (req, res) => {
                 $unwind: "$User"
             },
         ])
+
+        // const coinHistory = await CoinSchema.find()
         return res.status(200).json({
             data: coinHistory
         })

@@ -62,9 +62,11 @@ const userSchema = new mongoose.Schema({
   },
   tag: {
     type: String
-
+  },
+  isReseller: {
+    type: Boolean, default: false,
   }
-
+  
 })
 
 module.exports = mongoose.model("users", userSchema);

@@ -20,6 +20,10 @@ const GiftSchema = new mongoose.Schema({
     giftValue: {
         type: String,
         required: true
+    },
+    giftName: {
+        type: String,
+        required: true
     }
 })
 

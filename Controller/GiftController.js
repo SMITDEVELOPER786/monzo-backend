@@ -13,10 +13,10 @@ cloudinary.config({
 
 exports.uploadGift = async (req, res) => {
     try {
-        const { giftCategory, giftValue } = req.body;
-        if (!giftCategory || !req.file || !giftValue) {
+        const { giftCategory, giftValue, giftName } = req.body;
+        if (!giftCategory || !req.file || !giftValue || !giftName) {
             return res.status(404).json({
-                message: "giftCategory , gift image & giftValue is required"
+                message: "giftCategory , gift image , giftName & giftValue is required"
             })
         }
         const cloud = await cloudinary.uploader.upload(req.file.path, {

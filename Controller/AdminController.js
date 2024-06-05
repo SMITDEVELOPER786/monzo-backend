@@ -487,10 +487,10 @@ exports.changeInfoForm = async (req, res) => {
             req.body.profileImage = await cloud.secure_url.split("/upload")[1]
         }
 
-        // await user.set(req.body);
-        // await userProf.set(req.body);
+        await user.set(req.body);
+        await userProf.set(req.body);
         return res.status(200).json({
-            message: "User info updated"
+            message: "User info updated successfully"
         })
 
     } catch (e) {
