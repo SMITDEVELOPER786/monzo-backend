@@ -23,11 +23,35 @@ exports.uploadGift = async (req, res) => {
             folder: "giftImg"
         })
         req.body.giftImg = cloud.secure_url.split("upload/")[1],
-        await GiftSchema(req.body).save();
+            await GiftSchema(req.body).save();
         return res.status(200).json({
             message: "Gift added succesfully"
         })
 
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+exports.deleteGift = async (req, res) => {
+    try {
+        const { giftId } = req.body;
+        if (!giftId)
+            return res.status(404).json({
+                message: "Gift ID not found"
+            })
+        const gift = await GiftSchema.findById(giftId);
+        if (!gift) {
+            return res.status(404).json({
+                message: "Gift not found"
+            })
+        }
+        await GiftSchema.deleteOne({ _id: giftId })
+        return res.status(200).json({
+            message: "Gift deleted successfully"
+        })
     } catch (err) {
         return res.status(500).json({
             message: err.message
