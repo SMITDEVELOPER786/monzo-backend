@@ -11,33 +11,39 @@ cloudinary.config({
 
 exports.createVip = async (req, res) => {
     try {
-        const { vipImg, coinValue } = req.body;
-        if (!req.file) {
+        const { coinValue, vipCategory } = req.body;
+
+        console.log(req.files); // Log files to debug
+
+        if (!req.files || req.files.length === 0) {
             return res.status(404).json({
                 message: "Image is not found"
-            })
+            });
         }
         if (!coinValue) {
             return res.status(404).json({
                 message: "Coin Value is not found"
-            })
+            });
         }
-        const cloud = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'vipImg', // Set the folder where the image will be stored in Cloudinary
-        });
-        req.body.vipImg = cloud.secure_url.split("upload/")[1];
+        let vipImgs = [];
+        for (const file of req.files) {
+            const cloud = await cloudinary.uploader.upload(file.path, { folder: "vipImgs" })
+            console.log(cloud.secure_url.split("upload/")[1])
+            vipImgs.push(cloud.secure_url.split("upload/")[1])
+        }
+        req.body.vipImgs = vipImgs
+
 
         const vip = await VipSchema(req.body).save();
         return res.status(200).json({
             data: vip,
             message: "Vip added"
-        })
+        });
     } catch (err) {
         return res.status(500).json({
             message: err.message
-        })
+        });
     }
-
 }
 
 exports.getVips = async (req, res) => {

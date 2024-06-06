@@ -1,13 +1,16 @@
 const mongoose = require("mongoose");
 
 const VipSchema = new mongoose.Schema({
-    vipImg: {
-        type:String,
+    vipImgs: [{
+        type: String,
+        required: true
+    }],
+    coinValue: {
+        type: String,
         required: true
     },
-    coinValue: {
-        type: Number,
-        required: true
+    vipCategory: {
+        type: String,
     }
 })
 
