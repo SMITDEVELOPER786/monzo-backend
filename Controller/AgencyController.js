@@ -23,6 +23,7 @@ exports.createAgency = async (req, res) => {
             folder: "agencyImg"
         })
         req.body.status = "requested"
+        req.body.userId = req.user._id
         req.body.agencyImg = cloud.secure_url.split("upload/")[1]
         const agency = await AgencySchema(req.body).save();
         return res.status(200).json({
@@ -96,6 +97,43 @@ exports.rejectAgencyReq = async (req, res) => {
 
         return res.status(200).json({
             message: "agency request declined successfully"
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+exports.adminGetAgency = async (req, res) => {
+    try {
+        const data = await AgencySchema.aggregate([
+            { $match: {}, },
+            {
+                $lookup: {
+                    from: "users",
+                    let: { id: "$userId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$_id", "$$id"]
+                                }
+                            },
+                        },
+                        { $project: { Id: 1, email: 1, _id: 0 } }
+                    ],
+                    as: "User"
+
+                },
+
+            },
+            { $unwind: "$User" }
+
+        ])
+        // const data = await AgencySchema.find();
+        return res.status(200).json({
+            data
         })
     } catch (err) {
         return res.status(500).json({

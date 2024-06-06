@@ -484,11 +484,13 @@ exports.changeInfoForm = async (req, res) => {
             const cloud = await cloudinary.uploader.upload(req.file.path, {
                 folder: "profileImage"
             });
-            req.body.profileImage = await cloud.secure_url.split("/upload")[1]
+            console.log(cloud.secure_url)
+
+            req.body.profileImage = cloud.secure_url.split("upload/")[1]
         }
 
-        await user.set(req.body);
-        await userProf.set(req.body);
+        await user.set(req.body).save();
+        await userProf.set(req.body).save();
         return res.status(200).json({
             message: "User info updated successfully"
         })

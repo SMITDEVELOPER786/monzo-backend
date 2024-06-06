@@ -47,7 +47,7 @@ router.put("/bgImg/update/:id", protectAdmin, upload.single("bgImg"), AdminContr
 // agency
 router.post("/agency/accept", protectAdmin, AgencyController.acceptAgencyReq)
 router.post("/agency/reject", protectAdmin, AgencyController.rejectAgencyReq)
-router.get("/agency/get", protectAdmin, AgencyController.getAgency)
+router.get("/agency/get", protectAdmin, AgencyController.adminGetAgency)
 router.put("/agency/chngeInfo", protectAdmin, upload.single("agencyImg"), AgencyController.agencyChngeInfo)
 
 // assign tag or model

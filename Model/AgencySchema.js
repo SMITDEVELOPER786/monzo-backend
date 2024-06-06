@@ -1,4 +1,4 @@
-const { default: mongoose } = require("mongoose");
+const { default: mongoose, Schema } = require("mongoose");
 
 const agencySchema = new mongoose.Schema({
     idCard: {
@@ -19,6 +19,11 @@ const agencySchema = new mongoose.Schema({
     },
     status: {
         type: String,
+        required: true
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
         required: true
     }
 })
