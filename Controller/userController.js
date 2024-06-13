@@ -629,19 +629,19 @@ exports.getAllUser = async (req, res) => {
     //     }
     //   },
     //   {
-      //   $lookup: {
-      //     from: "users",
-      //     let: { id: "$_id" },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: { $eq: ["$_id", "$$id"] }
-      //         }
-      //       }
-      //     ],
-      //     as: "User"
-      //   }
-      // },
+    //   $lookup: {
+    //     from: "users",
+    //     let: { id: "$_id" },
+    //     pipeline: [
+    //       {
+    //         $match: {
+    //           $expr: { $eq: ["$_id", "$$id"] }
+    //         }
+    //       }
+    //     ],
+    //     as: "User"
+    //   }
+    // },
     //   {
     //     $addFields: {
     //       User: {
@@ -1120,7 +1120,7 @@ exports.editprofile = async (req, res) => {
 // Block User
 exports.banUser = async (req, res) => {
   try {
-    const { userId, banDuration } = req.body
+    const { userId, banDuration, isAdmin } = req.body
     if (!userId) {
       return res.status(400).json({
         message: "userId is required"
@@ -1148,7 +1148,7 @@ exports.banUser = async (req, res) => {
       await user.save();
       // ------ add for sub-admin activity ---------
 
-      await SubAdminActivitySchema({
+      !isAdmin && await SubAdminActivitySchema({
         subAdminId: req.user._id,
         performedAction: "ban User",
         userId: userId,
@@ -1180,7 +1180,7 @@ exports.banUser = async (req, res) => {
 // unBanUser User
 exports.unBanUser = async (req, res) => {
   try {
-    const { userId } = req.body
+    const { userId, isAdmin } = req.body
     if (!userId) {
       return res.status(400).json({
         message: "userId is required"
@@ -1200,6 +1200,17 @@ exports.unBanUser = async (req, res) => {
       user.banDuration = null;
       // user.banDuration = null;
       await user.save();
+
+      // ------ add for sub-admin activity ---------
+      console.log(isAdmin)
+      console.log(!isAdmin)
+      
+      !isAdmin && await SubAdminActivitySchema({
+        subAdminId: req.user._id,
+        performedAction: "unban User",
+        userId: userId,
+      }).save();
+
 
       return res.status(200).json({
         success: true,

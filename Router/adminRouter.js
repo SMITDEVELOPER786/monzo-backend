@@ -13,6 +13,7 @@ const coinRouter = require("./coinRouter.js");
 // const agencyRouter = require("./agencyRouter.js");
 const AgencyController = require("../Controller/AgencyController")
 const TagController = require("../Controller/TagController.js")
+const userController = require("../Controller/userController.js")
 
 
 const multer = require("multer")
@@ -42,6 +43,15 @@ router.post("/sub-admin/create", protectAdmin, AdminController.signup)
 router.get("/sub-admin/get", protectAdmin, AdminController.getAllSubAdmin);
 router.get("/get-subadmin-acitivity", protectAdmin, AdminController.getSubAdminActivity);
 router.delete("/sub-admin/delete/:id", protectAdmin, AdminController.deleteSubAdmin);
+
+// ---------- ban User
+router.post("/ban-user", protectAdmin, userController.banUser)
+router.post("/unBan-user", protectAdmin, userController.unBanUser)
+
+// ----------- level UP User
+router.post("/levelUp-user", protectAdmin, userController.levelUpUser)
+router.post("/levelDown-user", protectAdmin, userController.levelDownUser)
+
 
 router.post("/bgImg/upload", protectAdmin, upload.single("bgImg"), AdminController.uploadBackground)
 router.put("/bgImg/update/:id", protectAdmin, upload.single("bgImg"), AdminController.updateBackground)

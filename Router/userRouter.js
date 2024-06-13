@@ -41,16 +41,12 @@ router.post("/forgetpassword", userController.forgotPassword)
 router.post("/verify-forget-otp", userController.VerifyForgetOTP)
 router.post('/change-password', protect, userController.PasswordOtpVerify);
 
-router.post("/ban-user", protectAdmin, userController.banUser)
-router.post("/unBan-user", protectAdmin, userController.unBanUser)
 // router.post("/changeBan-user", userController.changeBanUser)
 
 
 
 router.get("/myprofile", protect, userController.Myprofile)
 router.get("/get-all-user", protectAdmin, userController.getAllUser)
-router.post("/levelUp-user", protectAdmin, userController.levelUpUser)
-router.post("/levelDown-user", protectAdmin, userController.levelDownUser)
 router.post("/follow", protect, follow)
 router.post("/unfollow", protect, unfollow)
 router.get("/getfollowing", protect, getListFollowValidationRules)

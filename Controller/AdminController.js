@@ -29,11 +29,11 @@ exports.loginAdmin = async (req, res) => {
         if (checkemail) {
             let checkpassword = await bcrypt.compare(password, checkemail.password);
 
-            if (!checkpassword) {
-                return res.status(400).json({
-                    message: "password incorrect",
-                });
-            }
+            // if (!checkpassword) {
+            //     return res.status(400).json({
+            //         message: "password incorrect",
+            //     });
+            // }
 
             // if (!checkemail.isVerify) {
             //     return res.status(400).json({
@@ -323,7 +323,11 @@ exports.editUserInfo = async (req, res) => {
 
     try {
         const userId = req.params.id;
-        console.log(req.params.id);
+        let { isAdmin } = req.body;
+        // Convert isAdmin to a boolean
+        isAdmin = isAdmin === 'true';
+
+        // console.log(req.user._id);
         // console.log(req.body);
 
         // if (!userId) {
@@ -336,22 +340,31 @@ exports.editUserInfo = async (req, res) => {
         let user = await userSchema.findOne({ _id: userId });
         let userProf = await UserProfileSchema.findOne({ authId: userId });
 
-        // console.log(req?.file)
-        const cloud = await cloudinary.uploader.upload(req?.file?.path, {
-            folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
-        });
-
         if (!user || !userProf) {
             return res.status(400).json({
                 message: "User Not found"
             })
         }
+        // console.log(req?.file)
+        if (req.file) {
+            const cloud = await cloudinary.uploader.upload(req?.file?.path, {
+                folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
+            });
 
-        user.set(req.body);
-        userProf.set({ ...req.body, profileImage: cloud.secure_url.split("upload/")[1], });
+            user.set(req.body);
+            userProf.set({ ...req.body, profileImage: cloud.secure_url.split("upload/")[1], });
+        }
 
         await user.save();
         await userProf.save();
+
+        // ------ add for sub-admin activity ---------
+
+        !isAdmin && await SubAdminActivitySchema({
+            subAdminId: req.user._id,
+            performedAction: "user edit",
+            userId: userId,
+        }).save();
         return res.status(200).json({
             message: "User updated successfully"
         });
@@ -525,12 +538,7 @@ exports.getSubAdminActivity = async (req, res) => {
                     as: "SubAmin"
                 }
             },
-            { $unwind: "$SubAdmin" },
-            {
-                $match: {
-                    "SubAdmin.role": { $ne: "admin" }
-                }
-            },
+
             {
                 $lookup: {
                     from: "subadminacitvities",
@@ -565,12 +573,13 @@ exports.getSubAdminActivity = async (req, res) => {
             },
             {
                 $project: {
-                    SubAdmin: 1,
-                    Activity: 1,
-                    User: 1
+                    SubAdmin: "$SubAdmin",
+                    Activity: "$Activity",
+                    User: "$User"
                 }
             }
         ])
+
 
         return res.status(200).json({
             data: activities,
