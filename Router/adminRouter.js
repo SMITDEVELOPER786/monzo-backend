@@ -34,11 +34,13 @@ const upload = multer({ storage: storage });
 
 
 
-router.post("/sub-admin/create", protectAdmin, AdminController.signup)
 router.post("/verifyOtp", AdminController.verifyOtp)
 router.post("/login", AdminController.loginAdmin)
 router.post("/logout", AdminController.logoutAdmin)
+// ----------- sub admin routes
+router.post("/sub-admin/create", protectAdmin, AdminController.signup)
 router.get("/sub-admin/get", protectAdmin, AdminController.getAllSubAdmin);
+router.get("/get-subadmin-acitivity", protectAdmin, AdminController.getSubAdminActivity);
 router.delete("/sub-admin/delete/:id", protectAdmin, AdminController.deleteSubAdmin);
 
 router.post("/bgImg/upload", protectAdmin, upload.single("bgImg"), AdminController.uploadBackground)

@@ -6,6 +6,7 @@ const { mail } = require("../Email/nodeMailer.js");
 const userSchema = require("../Model/userSchema.js");
 const UserProfileSchema = require("../Model/UserProfileSchema.js");
 const bgImgSchema = require("../Model/bgImgSchema.js");
+const SubAdminActivitySchema = require("../Model/SubAdminActivitySchema.js");
 require("dotenv").config();
 const secretkey = process.env.secret_key;
 
@@ -33,6 +34,7 @@ exports.loginAdmin = async (req, res) => {
                     message: "password incorrect",
                 });
             }
+
             // if (!checkemail.isVerify) {
             //     return res.status(400).json({
             //         message: "Account is not verified. Please verify your account.",
@@ -70,61 +72,61 @@ exports.loginAdmin = async (req, res) => {
     }
 };
 
-exports.loginSubAdmin = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+// exports.loginSubAdmin = async (req, res) => {
+//     try {
+//         const { email, password } = req.body;
 
-        const checkemail = await AdminSchema.findOne({ email, role: "subAdmin" });
+//         const checkemail = await AdminSchema.findOne({ email, role: "subAdmin" });
 
-        if (checkemail) {
-            let checkpassword = await bcrypt.compare(password, checkemail.password);
+//         if (checkemail) {
+//             let checkpassword = await bcrypt.compare(password, checkemail.password);
 
-            if (!checkpassword) {
-                return res.status(400).json({
-                    message: "password incorrect",
-                });
-            }
-            if (checkemail.role !== "subAdmin") {
-                return res.status(400).json({
-                    message: "login as subAdmin",
-                });
-            }
-            // if (!checkemail.isVerify) {
-            //     return res.status(400).json({
-            //         message: "Account is not verified. Please verify your account.",
-            //     });
+//             if (!checkpassword) {
+//                 return res.status(400).json({
+//                     message: "password incorrect",
+//                 });
+//             }
+//             if (checkemail.role !== "subAdmin") {
+//                 return res.status(400).json({
+//                     message: "login as subAdmin",
+//                 });
+//             }
+//             // if (!checkemail.isVerify) {
+//             //     return res.status(400).json({
+//             //         message: "Account is not verified. Please verify your account.",
+//             //     });
 
-            // }
-            // if (!checkemail.isCompleteProfile) {
-            //     return res.status(400).json({
-            //         message: "Please Complete Your Profile First.",
-            //     });
+//             // }
+//             // if (!checkemail.isCompleteProfile) {
+//             //     return res.status(400).json({
+//             //         message: "Please Complete Your Profile First.",
+//             //     });
 
-            // }
-            // else {
-            const token = jwt.sign({ userId: checkemail._id }, secretkey, {
-                expiresIn: "4h",
-            });
+//             // }
+//             // else {
+//             const token = jwt.sign({ userId: checkemail._id }, secretkey, {
+//                 expiresIn: "4h",
+//             });
 
-            console.log(token);
-            return res.status(200).json({
-                message: "login Successfully ",
-                data: checkemail,
-                token: token,
-            });
-            // }
-        } else {
-            return res.status(400).json({
-                message: "user not found",
-            });
-        }
-    } catch (e) {
-        return res.status(400).json({
-            message: "Server error",
-            error: e.message,
-        });
-    }
-};
+//             console.log(token);
+//             return res.status(200).json({
+//                 message: "login Successfully ",
+//                 data: checkemail,
+//                 token: token,
+//             });
+//             // }
+//         } else {
+//             return res.status(400).json({
+//                 message: "user not found",
+//             });
+//         }
+//     } catch (e) {
+//         return res.status(400).json({
+//             message: "Server error",
+//             error: e.message,
+//         });
+//     }
+// };
 // Signup only for SubAdmin
 exports.signup = async (req, res) => {
     const { email, password, } = req.body;
@@ -494,6 +496,86 @@ exports.changeInfoForm = async (req, res) => {
         return res.status(200).json({
             message: "User info updated successfully"
         })
+
+    } catch (e) {
+        return res.status(400).json({
+            message: "Internal Server error",
+            error: e.message,
+        });
+    }
+}
+
+exports.getSubAdminActivity = async (req, res) => {
+    try {
+
+        const activities = await SubAdminActivitySchema.aggregate([
+            { $match: {} },
+            {
+                $lookup: {
+                    let: { id: "$subAdminId" },
+                    from: "admins",
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: { $eq: ["$_id", "$$id"] },
+                                }
+                            }
+                        }],
+                    as: "SubAmin"
+                }
+            },
+            { $unwind: "$SubAdmin" },
+            {
+                $match: {
+                    "SubAdmin.role": { $ne: "admin" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "subadminacitvities",
+                    let: { id: "$subAdminId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: { $eq: ["$subAdminId", "$$id"] }
+                                }
+                            }
+                        }
+                    ],
+                    as: "Activity"
+                }
+            },
+            {
+                $lookup: {
+                    from: "userprofiles",
+                    let: { id: "$userId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: { $eq: ["$authId", "$$id"] }
+                                }
+                            }
+                        }
+                    ],
+                    as: "User"
+                }
+            },
+            {
+                $project: {
+                    SubAdmin: 1,
+                    Activity: 1,
+                    User: 1
+                }
+            }
+        ])
+
+        return res.status(200).json({
+            data: activities,
+            length: activities.length
+        });
 
     } catch (e) {
         return res.status(400).json({

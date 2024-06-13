@@ -1,4 +1,6 @@
 const VipSchema = require("../Model/VipSchema");
+const UserSchema = require("../Model/userSchema");
+const VipAssignSchema = require("../Model/VipAssignSchema");
 require("dotenv").config();
 const secretkey = process.env.secret_key;
 
@@ -103,6 +105,36 @@ exports.deleteVip = async (req, res) => {
         return res.status(200).json({
             message: "Vip deleted successfully...!"
         })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+
+exports.giveVIP = async (req, res) => {
+    try {
+        const { userId, duration, vipId } = req.body;
+        if (!userId || !duration || !vipId) {
+            return res.status(404).json({
+                message: "userId, duration, vipId not found"
+            })
+        }
+        const findVip = await VipSchema.findById(vipId);
+        const findUser = await UserSchema.findById(userId);
+        if (!findVip || !findUser) {
+            return res.status(404).json({
+                message: "Vip or User not found"
+            })
+        }
+        req.body.vipLevel = findVip.vipCategory;
+        await VipAssignSchema(req.body).save();
+        return res.status(200).json({
+            message: `Vip Assigned to User ${findUser.Id}`
+        })
+
+
     } catch (err) {
         return res.status(500).json({
             message: err.message

@@ -21,10 +21,12 @@ const upload = multer({ storage: storage });
 
 
 
-router.post("/login", AdminController.loginSubAdmin)
-router.post("/ban-user", protectSubAdmin, userController.banUser)
-router.post("/unban-user", protectSubAdmin, userController.unBanUser)
-router.post("/search-user", protectSubAdmin, AdminController.searchById)
-router.put("/edit-user/:id", protectSubAdmin, upload.single("profileImage"), AdminController.editUserInfo)
+// router.post("/login", AdminController.loginSubAdmin)
+router.get("/get-all-user", protectSubAdmin, userController.getAllUser);
+
+router.post("/ban-user", protectSubAdmin, userController.banUser);
+router.post("/unban-user", protectSubAdmin, userController.unBanUser);
+router.post("/search-user", protectSubAdmin, AdminController.searchById);
+router.put("/edit-user/:id", protectSubAdmin, upload.single("profileImage"), AdminController.editUserInfo);
 
 module.exports = router

@@ -12,6 +12,8 @@ const reelsSchema = require('../Model/reelsSchema');
 
 const Followers = require("../Model/Followers.js");
 const CustomIdSchema = require("../Model/CustomIdSchema.js");
+const AdminSchema = require("../Model/AdminSchema.js");
+const SubAdminActivitySchema = require("../Model/SubAdminActivitySchema.js");
 // const UserProfileSchema = require("../Model/UserProfileSchema.js");
 require("dotenv").config();
 const otpStorage = {};
@@ -598,36 +600,126 @@ exports.getAllUser = async (req, res) => {
 
   try {
 
-    var user = await userSchema.aggregate([
+    // const user = await userSchema.aggregate([
+    //   {
+    //     $match: {} // Match all documents in the userSchema collection
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "userprofiles",
+    //       let: { id: "$_id" },
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: { $eq: ["$authId", "$$id"] }
+    //           }
+    //         }
+    //       ],
+    //       as: "UserProf"
+    //     }
+    //   },
+    //   {
+    //     $addFields: {
+    //       hasProfile: { $gt: [{ $size: "$UserProf" }, 0] }
+    //     }
+    //   },
+    //   {
+    //     $match: {
+    //       hasProfile: true // Only include documents where hasProfile is true
+    //     }
+    //   },
+    //   {
+      //   $lookup: {
+      //     from: "users",
+      //     let: { id: "$_id" },
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           $expr: { $eq: ["$_id", "$$id"] }
+      //         }
+      //       }
+      //     ],
+      //     as: "User"
+      //   }
+      // },
+    //   {
+    //     $addFields: {
+    //       User: {
+    //         $cond: {
+    //           if: "$hasProfile",
+    //           then: "$User",
+    //           else: []
+    //         }
+    //       }
+    //     }
+    //   },
+    //   {
+    // $project: {
+    //   isBan: { $arrayElemAt: ["$UserProf.isBan", 0] },
+    //   banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
+    //   isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
+    //   isReseller: { $arrayElemAt: ["$User.isReseller", 0] },
+    //   username: { $arrayElemAt: ["$UserProf.username", 0] },
+    //   dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
+    //   profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
+    //   gender: { $arrayElemAt: ["$UserProf.gender", 0] },
+    //   isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
+    //   Id: { $arrayElemAt: ["$User.Id", 0] }
+    // }
+    //   }
+    // ]);
+
+    const user = await userSchema.aggregate([
       { $match: {} },
       {
         $lookup: {
-          from: "users",
           let: { id: "$_id" },
-          pipeline: [{
-            $match: {
-              $expr: {
-                $and: { $eq: ["$_id", "$$id"] }
+          from: "userprofiles",
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: { $eq: ["$authId", "$$id"] }
+                }
+              },
+            }
+          ],
+          as: "UserProf"
+        }
+      },
+      {
+        $addFields: {
+          hasProfile: { $gt: [{ $size: "$UserProf" }, 0] } // userProf is not empty or "0"
+        }
+      },
+      {
+        $match: { hasProfile: true }
+      },
+      {
+        $lookup: {
+          let: { id: "$_id" },
+          from: "users",
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: { $eq: ["$_id", "$$id"] }
+                }
               }
             }
-          },
           ],
           as: "User"
         }
       },
       {
-        $lookup: {
-          from: "userprofiles",
-          let: { id: "$_id" },
-          pipeline: [{
-            $match: {
-              $expr: {
-                $and: { $eq: ["$authId", "$$id"] }
-              }
+        $addFields: {
+          User: {
+            $cond: {
+              if: "$hasProfile",
+              then: "$User",
+              else: []
             }
-          },
-          ],
-          as: "UserProf"
+          }
         }
       },
       {
@@ -641,11 +733,11 @@ exports.getAllUser = async (req, res) => {
           profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
           gender: { $arrayElemAt: ["$UserProf.gender", 0] },
           isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
-          Id: { $arrayElemAt: ["$User.Id", 0] },
-          // username: { $arrayElemAt: ["$UserProf.username", 0] },
+          Id: { $arrayElemAt: ["$User.Id", 0] }
         }
       }
-    ]);
+    ])
+
 
     if (user) {
       return res.status(200).json({
@@ -1047,11 +1139,20 @@ exports.banUser = async (req, res) => {
         message: "user not found"
       })
     }
+    // const findSubAdmin = await AdminSchema.findById(req.user._id);
+
     if (user.isBan === false) {
 
       user.isBan = true;
       user.banDuration = banDuration;
       await user.save();
+      // ------ add for sub-admin activity ---------
+
+      await SubAdminActivitySchema({
+        subAdminId: req.user._id,
+        performedAction: "ban User",
+        userId: userId,
+      }).save();
 
       return res.status(200).json({
         success: true,
