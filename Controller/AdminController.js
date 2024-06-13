@@ -531,11 +531,11 @@ exports.getSubAdminActivity = async (req, res) => {
                         {
                             $match: {
                                 $expr: {
-                                    $and: { $eq: ["$_id", "$$id"] },
+                                    $eq: ["$_id", "$$id"],
                                 }
                             }
                         }],
-                    as: "SubAmin"
+                    as: "SubAdmin"
                 }
             },
 
@@ -573,9 +573,12 @@ exports.getSubAdminActivity = async (req, res) => {
             },
             {
                 $project: {
-                    SubAdmin: "$SubAdmin",
-                    Activity: "$Activity",
-                    User: "$User"
+                    SubAdminEmail: { $arrayElemAt: ["$SubAdmin.email", 0] },
+                    // Activity: "$Activity",
+                    // User: "$User"
+                    performedAction: { $arrayElemAt: ["$Activity.performedAction", 0] },
+                    username: { $arrayElemAt: ["$User.username", 0] },
+                    createdAt: 1
                 }
             }
         ])
