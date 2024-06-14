@@ -41,7 +41,7 @@ router.post("/logout", AdminController.logoutAdmin)
 // ----------- sub admin routes
 router.post("/sub-admin/create", protectAdmin, AdminController.signup)
 router.get("/sub-admin/get", protectAdmin, AdminController.getAllSubAdmin);
-router.get("/get-subadmin-acitivity", protectAdmin, AdminController.getSubAdminActivity);
+router.get("/sub-admin/activities", protectAdmin, AdminController.getSubAdminActivity);
 router.delete("/sub-admin/delete/:id", protectAdmin, AdminController.deleteSubAdmin);
 
 // ---------- ban User

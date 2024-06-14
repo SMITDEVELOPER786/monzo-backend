@@ -525,34 +525,16 @@ exports.getSubAdminActivity = async (req, res) => {
             { $match: {} },
             {
                 $lookup: {
-                    let: { id: "$subAdminId" },
                     from: "admins",
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $eq: ["$_id", "$$id"],
-                                }
-                            }
-                        }],
-                    as: "SubAdmin"
-                }
-            },
-
-            {
-                $lookup: {
-                    from: "subadminacitvities",
                     let: { id: "$subAdminId" },
                     pipeline: [
                         {
                             $match: {
-                                $expr: {
-                                    $and: { $eq: ["$subAdminId", "$$id"] }
-                                }
+                                $expr: { $eq: ["$_id", "$$id"] }
                             }
-                        }
+                        },
                     ],
-                    as: "Activity"
+                    as: "Admin"
                 }
             },
             {
@@ -563,7 +545,7 @@ exports.getSubAdminActivity = async (req, res) => {
                         {
                             $match: {
                                 $expr: {
-                                    $and: { $eq: ["$authId", "$$id"] }
+                                    $eq: ["$authId", "$$id"]
                                 }
                             }
                         }
@@ -572,17 +554,30 @@ exports.getSubAdminActivity = async (req, res) => {
                 }
             },
             {
+                $lookup: {
+                    from: "subadminacitvities",
+                    let: { id: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$_id", "$$id"]
+                                }
+                            }
+                        }
+                    ],
+                    as: "Activity"
+                }
+            },
+            {
                 $project: {
-                    SubAdminEmail: { $arrayElemAt: ["$SubAdmin.email", 0] },
-                    // Activity: "$Activity",
-                    // User: "$User"
-                    performedAction: { $arrayElemAt: ["$Activity.performedAction", 0] },
+                    subAdmin: { $arrayElemAt: ["$Admin.email", 0] },
                     username: { $arrayElemAt: ["$User.username", 0] },
+                    performAction: { $arrayElemAt: ["$Activity.performedAction", 0] },
                     createdAt: 1
                 }
             }
-        ])
-
+        ]);
 
         return res.status(200).json({
             data: activities,
