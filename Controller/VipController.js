@@ -10,6 +10,7 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
+const labels = ['Vip Badge', 'Frame', 'Entrance Effects', 'Car', 'Personal Profile'];
 
 exports.createVip = async (req, res) => {
     try {
@@ -27,13 +28,18 @@ exports.createVip = async (req, res) => {
                 message: "Coin Value is not found"
             });
         }
-        let vipImgs = [];
+        // console.log(coinValue)
+        let vipImgsArr = [];
+        let index = 0;
         for (const file of req.files) {
             const cloud = await cloudinary.uploader.upload(file.path, { folder: "vipImgs" })
-            console.log(cloud.secure_url.split("upload/")[1])
-            vipImgs.push(cloud.secure_url.split("upload/")[1])
+            // console.log(cloud.secure_url.split("upload/")[1])
+            // console.log(labels[index])
+            vipImgsArr.push({ vipImgLabel: labels[index], vipImg: cloud.secure_url.split("upload/")[1] })
+            ++index;
         }
-        req.body.vipImgs = vipImgs
+        // console.log(vipImgsArr)
+        req.body.vipImgs = vipImgsArr
 
 
         const vip = await VipSchema(req.body).save();
@@ -115,7 +121,7 @@ exports.deleteVip = async (req, res) => {
 
 exports.giveVIP = async (req, res) => {
     try {
-        const { userId, duration, vipId } = req.body;
+        const { userId, duration, vipId, vipLevel } = req.body;
         if (!userId || !duration || !vipId) {
             return res.status(404).json({
                 message: "userId, duration, vipId not found"
@@ -128,7 +134,7 @@ exports.giveVIP = async (req, res) => {
                 message: "Vip or User not found"
             })
         }
-        req.body.vipLevel = findVip.vipCategory;
+        // req.body.vipLevel = findVip.vipCategory;
         await VipAssignSchema(req.body).save();
         return res.status(200).json({
             message: `Vip Assigned to User ${findUser.Id}`
