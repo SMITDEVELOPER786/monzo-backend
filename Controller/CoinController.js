@@ -84,7 +84,7 @@ exports.coinRefund = async (req, res) => {
                 message: "User or User Account not found..!"
             })
         }
-        if (!findUserCoins.resellerId != resellerId) {
+        if (findUserCoins.resellerId != resellerId) {
             return res.status(404).json({
                 message: "UserId or ResellerId is not belong to same account..!"
             })
@@ -96,7 +96,7 @@ exports.coinRefund = async (req, res) => {
             })
         await CoinSchema.findOneAndUpdate({ userId }, { coins: findUserCoins.coins - refundAmount });
         return res.status(200).json({
-            message: `${refundAmount} is refunded to reseller ${resellerId}`
+            message: `${refundAmount} coins is refunded to reseller ${resellerId}`
         })
     } catch (err) {
         return res.status(500).json({
