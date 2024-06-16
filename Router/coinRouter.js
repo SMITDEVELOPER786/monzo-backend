@@ -7,6 +7,6 @@ const userController = require("../Controller/userController")
 router.post("/transfer", CoinController.transferCoins);
 router.get("/", CoinController.coinHistoryChecker);
 router.post("/make-reseller", userController.makeUserReseller);
-// router.get("/id-get", CustomIdController.getCustomId)
+router.post("/refund", CoinController.coinRefund)
 
 module.exports = router

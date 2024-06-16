@@ -10,7 +10,7 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
-const labels = ['Vip Badge', 'Frame', 'Entrance Effects', 'Car', 'Personal Profile'];
+const labels = ['Vip Badge', 'Frame', 'Entrance Effects', 'Car', 'Colorful Message', 'Personal Profile'];
 
 exports.createVip = async (req, res) => {
     try {

@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/create", protectAdmin, upload.array("vipImgs", 5), VipController.createVip)
+router.post("/create", protectAdmin, upload.array("vipImgs", 6), VipController.createVip)
 router.get("/get", protectAdmin, VipController.getVips)
 router.put("/update/:id", protectAdmin, upload.single("vipImg"), VipController.updateVip)
 router.delete("/delete/:id", protectAdmin, VipController.deleteVip)

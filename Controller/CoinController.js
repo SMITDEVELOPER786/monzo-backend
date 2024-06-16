@@ -67,3 +67,40 @@ exports.coinHistoryChecker = async (req, res) => {
         })
     }
 }
+
+
+exports.coinRefund = async (req, res) => {
+    try {
+        const { resellerId, refundAmount, userId } = req.body;
+        if (!resellerId, !userId) return res.status(400).json({
+            message: "resellerId & userID are required"
+        })
+        if (!refundAmount) return res.status(400).json({
+            message: "refund amount is required"
+        })
+        const findUserCoins = await CoinSchema.findOne({ userId });
+        if (!findUserCoins) {
+            return res.status(404).json({
+                message: "User or User Account not found..!"
+            })
+        }
+        if (!findUserCoins.resellerId != resellerId) {
+            return res.status(404).json({
+                message: "UserId or ResellerId is not belong to same account..!"
+            })
+        }
+
+        if (refundAmount > findUserCoins.coins)
+            return res.status(400).json({
+                message: "Invalid amount or amount is greater than current balance"
+            })
+        await CoinSchema.findOneAndUpdate({ userId }, { coins: findUserCoins.coins - refundAmount });
+        return res.status(200).json({
+            message: `${refundAmount} is refunded to reseller ${resellerId}`
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
