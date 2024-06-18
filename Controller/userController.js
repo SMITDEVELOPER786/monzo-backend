@@ -14,6 +14,7 @@ const Followers = require("../Model/Followers.js");
 const CustomIdSchema = require("../Model/CustomIdSchema.js");
 const AdminSchema = require("../Model/AdminSchema.js");
 const SubAdminActivitySchema = require("../Model/SubAdminActivitySchema.js");
+const { accessTokenValidator } = require("../Validator/socialValidator.js");
 // const UserProfileSchema = require("../Model/UserProfileSchema.js");
 require("dotenv").config();
 const otpStorage = {};
@@ -132,6 +133,104 @@ exports.signup = async (req, res) => {
   }
 };
 
+exports.socialAuthApi =async(req,res)=>{
+  const {  accessToken, socialType } = req.body;
+  console.log(socialType)
+  const result = accessTokenValidator(accessToken,socialType)
+  const { hasError, message, data } = await accessTokenValidator(accessToken, socialType);
+  console.log(data)
+  if(hasError){
+    return  res.status(200).json({
+      message: message,
+      error:hasError,
+      data:data
+    });
+
+  }
+  const checkemail = await userSchema.findOne({email: data.identifier });
+  if (checkemail) {
+    
+    if (!checkemail.isVerify) {
+      return res.status(400).json({
+        message: "Account is not verified. Please verify your account.",
+      });
+
+    }
+    if (!checkemail.isCompleteProfile) {
+      return res.status(400).json({
+        message: "Please Complete Your Profile First.",
+      });
+
+    }
+    else {
+      const token = jwt.sign({ userId: checkemail._id }, secretkey, {
+        expiresIn: "4h",
+      });
+
+      console.log(token);
+      return res.status(200).json({
+        message: "login Successfully ",
+        data: checkemail,
+        token: token,
+      });
+    }
+  } 
+
+
+  let count = await userScheema.countDocuments().exec();
+  const paddedCount = String(count + 1).padStart(6, '0'); // Pad with zeros to ensure 6 digits
+  const findId = await CustomIdSchema.findOne({ customId: paddedCount });
+  const userId = findId ? paddedCount + 1 : paddedCount;
+
+  req.body.Id = userId;
+  req.body.email = data.identifier;
+  req.body.isVerify = true;
+
+  const newUser = new userSchema({
+    email: data.identifier,
+    isVerify: true,
+    Id: userId,
+  });
+
+  try {
+    const savedUser = await newUser.save();
+
+    const newUserProfile = new userprofileSchema({
+      authId: savedUser._id,
+      username: data.name,
+      profileImage: data.imageUrl,
+      dateOfBirth: new Date(), // Placeholder, replace with actual date
+      gender: "male", // Placeholder, replace with actual gender
+      favBroadcaster: "N/A", // Placeholder, replace with actual favorite broadcaster
+    });
+
+    const savedUserProfile = await newUserProfile.save();
+
+    console.log(savedUser);
+    console.log(savedUserProfile);
+
+    await userSchema.findByIdAndUpdate(savedUser._id, {
+      isCompleteProfile: true,
+      profileId: savedUserProfile._id, // assuming you want to link UserProfile to User
+    });
+
+    return res.status(200).json({
+      message: "User registered successfully",
+      error: false,
+      data: { user: savedUser, profile: savedUserProfile },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error saving user data",
+      error: true,
+      details: err.message,
+    });
+  }
+
+  
+
+
+}
 // // Send OTP
 // exports.sendOtp = async (req, res) => {
 //   try {
