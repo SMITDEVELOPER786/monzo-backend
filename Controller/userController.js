@@ -213,11 +213,15 @@ exports.socialAuthApi =async(req,res)=>{
       isCompleteProfile: true,
       profileId: savedUserProfile._id, // assuming you want to link UserProfile to User
     });
+    const token = jwt.sign({ userId: checkemail._id }, secretkey, {
+      expiresIn: "4h",
+    });
 
     return res.status(200).json({
       message: "User registered successfully",
       error: false,
       data: { user: savedUser, profile: savedUserProfile },
+      token:token
     });
   } catch (err) {
     return res.status(500).json({
