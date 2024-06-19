@@ -468,6 +468,13 @@ exports.login = async (req, res) => {
           expiresIn: "4h",
         });
 
+        const findProfile = await userprofileSchema.findOne({authId:checkemail._id})
+        console.log(findProfile)
+        if(findProfile){
+          checkemail.ProfileId= findProfile
+
+        }
+
         console.log(token);
         return res.status(200).json({
           message: "login Successfully ",
