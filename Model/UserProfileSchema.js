@@ -40,9 +40,10 @@ const userprofileSchema = new mongoose.Schema({
     ref: "users",
     required: true,
   },
-  // followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
-  // following: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
-
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
+  friends:[{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
+  visitors:[{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
 
   isBlocked: {
     type: Boolean,
