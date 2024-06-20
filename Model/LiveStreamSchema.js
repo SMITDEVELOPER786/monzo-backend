@@ -11,6 +11,7 @@ const tagSchema = mongoose.Schema({
 const StreamSchema = mongoose.Schema({
     hostId: { type: Schema.Types.ObjectId, ref: "users" },
     hostName: { type: String, required: true },
+    hostImage: { type: String, required: true },
     title: { type: String, required: true },
     streamType: { type: String, required: true, enum: streamTypeEnum },
     streamLevel: { type: String, required: true, enum: streamLevelEnum },
@@ -21,6 +22,7 @@ const StreamSchema = mongoose.Schema({
     isdelete: { type: Boolean, default: false }, // Adding default value false
     streamImg: { type: String },
     country: { type: String },
+
 
 });
 

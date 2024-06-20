@@ -99,6 +99,7 @@ exports.CreateLiveStreamController = async (req, res) => {
         const liveStreamData = {
             hostName: user.username,
             hostId: req.user._id,
+            hostImage:user.profileImage,
             streamType,
             title,
             scheduleTime,

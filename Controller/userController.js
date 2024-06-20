@@ -680,6 +680,67 @@ exports.completeProfile = async (req, res) => {
   }
 };
 
+// exports.editProfile = async (req, res) => {
+//   const { body } = req;
+
+//   try {
+//     req.userId = req.user._id;
+//     const user = await userSchema.findById(req.userId);
+
+//     if (user) {
+//       // Validate only if the profile is not completed
+//       if (user.isCompleteProfile === false) {
+//         await ProfileValidator.validateAsync(body);
+//       }
+
+//       // Prepare the updated fields
+//       let updateFields = {
+//         ...body,
+//       };
+
+//       if (req.file) {
+//         const cloud = await cloudinary.uploader.upload(req.file.path, {
+//           folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
+//         });
+//         updateFields.profileImage = cloud.secure_url.split("upload/")[1];
+//       }
+
+//       // Create or update the user profile
+//       let userProfile;
+//       if (user.profileId) {
+//         userProfile = await userprofileSchema.findByIdAndUpdate(
+//           user.profileId,
+//           { $set: updateFields },
+//           { new: true }
+//         );
+//       } else {
+//         updateFields.authId = req.userId;
+//         userProfile = new userprofileSchema(updateFields);
+//         await userProfile.save();
+
+//         await userSchema.findByIdAndUpdate(req.userId, {
+//           isCompleteProfile: true,
+//           profileId: userProfile._id, // Link UserProfile to User
+//         });
+//       }
+
+//       return res.status(200).json({
+//         message: "Profile updated",
+//         data: userProfile, // Send updated profile data back
+//       });
+//     } else {
+//       return res.status(404).json({
+//         message: "User not found",
+//       });
+//     }
+//   } catch (e) {
+//     return res.status(500).json({
+//       message: "Server error",
+//       error: e,
+//     });
+//   }
+// };
+
 // POST request to logout
 exports.Logout = async (req, res) => {
   const { body, headers } = req;
@@ -1190,27 +1251,36 @@ exports.editprofile = async (req, res) => {
 
     const user = await userSchema.findById(req.userId);
     // console.log(user)
+    let updateFields;
     if (user && user.isCompleteProfile === true) {
+      console.log(req.file)
       // Check if user's profile is already complete
-      if (req.file) {
+      if (req.file!=undefined) {
         body.profileImage = req.file.path;
+        const cloud = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
+        });
+         updateFields = {
+          username: body.username || user.username,
+          dateOfBirth: body.dateOfBirth || user.dateOfBirth,
+          gender: body.gender || user.gender,
+          favBroadcaster: body.favBroadcaster || user.favBroadcaster,
+          profileImage: cloud.secure_url.split("upload/")[1],
+          bio: body.bio || user.bio,
+        };
+      
       }
-      const cloud = await cloudinary.uploader.upload(req.file.path, {
-        folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
-      });
-      // console.log(cloud)
-      let updateFields = {
-        username: body.username || user.username,
-        dateOfBirth: body.dateOfBirth || user.dateOfBirth,
-        gender: body.gender || user.gender,
-        favBroadcaster: body.favBroadcaster || user.favBroadcaster,
-        profileImage: cloud.secure_url.split("upload/")[1],
-        bio: body.bio || user.bio,
-      };
+      else{
+         updateFields = {
+          username: body.username || user.username,
+          dateOfBirth: body.dateOfBirth || user.dateOfBirth,
+          gender: body.gender || user.gender,
+          favBroadcaster: body.favBroadcaster || user.favBroadcaster,
 
-      // if (req.file) {
-      //   updateFields.profileImage = body.profileImage;
-      // }
+          bio: body.bio || user.bio,
+        };
+      }
+    
 
       await userprofileSchema.findOneAndUpdate(
         { authId: req.userId },
