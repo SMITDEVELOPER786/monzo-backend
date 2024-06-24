@@ -14,6 +14,7 @@ const coinRouter = require("./coinRouter.js");
 const AgencyController = require("../Controller/AgencyController")
 const TagController = require("../Controller/TagController.js")
 const userController = require("../Controller/userController.js")
+const LevelIconController = require("../Controller/LevelIconController.js")
 
 
 const multer = require("multer")
@@ -51,6 +52,11 @@ router.post("/unBan-user", protectAdmin, userController.unBanUser)
 // ----------- level UP User
 router.post("/levelUp-user", protectAdmin, userController.levelUpUser)
 router.post("/levelDown-user", protectAdmin, userController.levelDownUser)
+// --------------- upload level icon
+router.post("/levelIcon-upload", protectAdmin, upload.single("levelIcon"), LevelIconController.uploadLevelIcon)
+router.get("/levelIcon-get", protectAdmin, LevelIconController.getLevelIcons)
+router.put("/levelIcon-update", protectAdmin, upload.single("levelIcon"), LevelIconController.updateLevelIcon)
+
 
 
 router.post("/bgImg/upload", protectAdmin, upload.single("bgImg"), AdminController.uploadBackground)
