@@ -9,7 +9,7 @@ cloudinary.config({
 
 exports.uploadReel = async (req, res) => {
     try {
-        // console.log(req.file)
+console.log(req)
         if (req.file == undefined) {
             res.status(404).json({ message: "Reel is Required" });
             // console.log(req.user._id)

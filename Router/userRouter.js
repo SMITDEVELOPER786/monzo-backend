@@ -60,7 +60,7 @@ router.get("/get-followers", userController.getFollowersUsers)
 router.get("/get-broadcaster", userController.getAllBroadCasters)
 router.get("/get-banner", BannerController.getBanners)
 router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
-
+router.get("/get-level-icon",userController.getSpeficesLevelIcons)
 
 router.use("/reel", reelRouter);
 router.use("/live-stream", protect, LiveStreamRouter);
@@ -69,6 +69,7 @@ router.use("/agency", protect, agencyRouter);
 // for admin
 router.use("/admin", adminRouter)
 router.use("/sub-admin", subAdminRouter)
+
 
 
 module.exports = router;

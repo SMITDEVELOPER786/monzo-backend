@@ -8,22 +8,30 @@ const storage = multer.diskStorage({
         cb(null, "./public/reels");
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + file.originalname);
+        // Use Date.now() to make sure filename is unique
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
-
+// File filter function
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype == "video/mp4" || file.mimetype == "video/webm") {
-        cb(null, true);
+    if (file.mimetype === "video/mp4" || file.mimetype === "video/webm" || file.mimetype === "video/x-matroska") {
+        cb(null, true); // Accept file
     } else {
-        cb(null, false);
+        cb(null, false); // Reject file
     }
 };
 
-const upload = multer({ fileFilter: fileFilter }).single("video");
+// Multer upload middleware
+const upload = multer({
+    // storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB file size limit
+    }
+}).single("video");
 
-
+// router.post('/upload-reel', upload, reelsController.uploadReel);
 router.route("/get-reels").get(reelsController.getReels)
 router.route("/upload-reels").post(upload, reelsController.uploadReel)
 router.route("/like").post(reelsController.likeReel)

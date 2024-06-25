@@ -15,6 +15,7 @@ const CustomIdSchema = require("../Model/CustomIdSchema.js");
 const AdminSchema = require("../Model/AdminSchema.js");
 const SubAdminActivitySchema = require("../Model/SubAdminActivitySchema.js");
 const { accessTokenValidator } = require("../Validator/socialValidator.js");
+const LevelIconSchema = require("../Model/LevelIconSchema.js");
 // const UserProfileSchema = require("../Model/UserProfileSchema.js");
 require("dotenv").config();
 const otpStorage = {};
@@ -775,6 +776,22 @@ exports.Myprofile = async (req, res) => {
   }
 
 };
+
+exports.getSpeficesLevelIcons = async (req, res) => {
+  try {
+    console.log(req.body.serialNo)
+      const getIcons = await LevelIconSchema.findOne({serialNo:req.body.serialNo});
+      return res.status(200).json({
+          data: getIcons
+      })
+  } catch (err) {
+      return res.status(500).json({
+          message: err.message
+      })
+  }
+}
+
+
 
 exports.getAllUser = async (req, res) => {
 
