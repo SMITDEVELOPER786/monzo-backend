@@ -17,7 +17,8 @@ const userController = require("../Controller/userController.js")
 const LevelIconController = require("../Controller/LevelIconController.js")
 
 
-const multer = require("multer")
+const multer = require("multer");
+const GuardianController = require("../Controller/GuardianController.js");
 
 
 const storage = multer.diskStorage({
@@ -57,6 +58,12 @@ router.post("/levelIcon-upload", protectAdmin, upload.single("levelIcon"), Level
 router.get("/levelIcon-get", protectAdmin, LevelIconController.getLevelIcons)
 router.put("/levelIcon-update", protectAdmin, upload.single("levelIcon"), LevelIconController.updateLevelIcon)
 
+// ---------------- guardian -----------
+router.post("/guardian/create", protectAdmin, upload.single("guardianImg"), GuardianController.createGuardian);
+router.get("/guardian/", GuardianController.getGuardian);
+router.put("/guardian/update", protectAdmin, upload.single("guardianImg"), GuardianController.updateGuardian);
+router.delete("/guardian/delete", protectAdmin, GuardianController.deleteGuardian);
+router.post("/guardian/give", GuardianController.giveGuardian);
 
 
 router.post("/bgImg/upload", protectAdmin, upload.single("bgImg"), AdminController.uploadBackground)

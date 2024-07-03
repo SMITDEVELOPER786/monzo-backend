@@ -1,16 +1,19 @@
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
 const typeGuard = ["Silver", "Gold", "King"]
 const guradianSchema = new mongoose.Schema({
-    guradianImg: {
+    guardianImg: {
         type: String,
+        required: true
     },
-    guradianCoin: {
-        type: Number
+    guardianCoin: {
+        type: Number,
+        required: true
     },
-    guradianType: {
+    guardianType: {
         type: String,
         enum: typeGuard,
+        required: true
     },
 })
 

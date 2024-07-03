@@ -57,7 +57,6 @@ exports.coinHistoryChecker = async (req, res) => {
             },
         ])
 
-        // const coinHistory = await CoinSchema.find()
         return res.status(200).json({
             data: coinHistory
         })
