@@ -40,6 +40,7 @@ const upload = multer({ storage: storage });
 router.post("/verifyOtp", AdminController.verifyOtp)
 router.post("/login", AdminController.loginAdmin)
 router.post("/logout", AdminController.logoutAdmin)
+
 // ----------- sub admin routes
 router.post("/sub-admin/create", protectAdmin, AdminController.signup)
 router.get("/sub-admin/get", protectAdmin, AdminController.getAllSubAdmin);
@@ -53,6 +54,7 @@ router.post("/unBan-user", protectAdmin, userController.unBanUser)
 // ----------- level UP User
 router.post("/levelUp-user", protectAdmin, userController.levelUpUser)
 router.post("/levelDown-user", protectAdmin, userController.levelDownUser)
+
 // --------------- upload level icon
 router.post("/levelIcon-upload", protectAdmin, upload.single("levelIcon"), LevelIconController.uploadLevelIcon)
 router.get("/levelIcon-get", protectAdmin, LevelIconController.getLevelIcons)
@@ -65,7 +67,7 @@ router.put("/guardian/update", protectAdmin, upload.single("guardianImg"), Guard
 router.delete("/guardian/delete", protectAdmin, GuardianController.deleteGuardian);
 router.post("/guardian/give", GuardianController.giveGuardian);
 
-
+// backgroud image
 router.post("/bgImg/upload", protectAdmin, upload.single("bgImg"), AdminController.uploadBackground)
 router.put("/bgImg/update/:id", protectAdmin, upload.single("bgImg"), AdminController.updateBackground)
 
@@ -78,6 +80,14 @@ router.put("/agency/chngeInfo", protectAdmin, upload.single("agencyImg"), Agency
 // assign tag or model
 router.post("/tag/add", protectAdmin, TagController.addUserTag)
 router.get("/tag/", protectAdmin, TagController.getAssignTags)
+router.put("/tag/update", protectAdmin, TagController.addUserTag)
+router.delete("/tag/delete", protectAdmin, TagController.deleteAssignTag)
+
+// special tag option
+router.post("/special-tag/assign", protectAdmin, TagController.assignSpecialTag)
+router.get("/special-tag/", protectAdmin, TagController.getAssignSpecialTags)
+router.put("/special-tag/update", protectAdmin, TagController.assignSpecialTag)
+router.delete("/special-tag/delete", protectAdmin, TagController.deleteAssignSpecialTag)
 
 
 router.put("/change/userInfo", protectAdmin, upload.single("profileImage"), AdminController.changeInfoForm)

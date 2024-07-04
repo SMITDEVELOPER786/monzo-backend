@@ -65,6 +65,9 @@ const userSchema = new mongoose.Schema({
   },
   isReseller: {
     type: Boolean, default: false,
+  },
+  specialTag: {
+    type: String
   }
 
 })

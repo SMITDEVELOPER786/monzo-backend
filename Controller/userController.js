@@ -930,7 +930,9 @@ exports.getAllUser = async (req, res) => {
           profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
           gender: { $arrayElemAt: ["$UserProf.gender", 0] },
           isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
-          Id: { $arrayElemAt: ["$User.Id", 0] }
+          Id: { $arrayElemAt: ["$User.Id", 0] },
+          tag: { $arrayElemAt: ["$User.tag", 0] },
+          specialTag: { $arrayElemAt: ["$User.specialTag", 0] }
         }
       }
     ])
