@@ -114,7 +114,7 @@ exports.deleteAssignSpecialTag = async (req, res) => {
                 message: "User ID is required"
             })
         }
-        const user = await userSchema.findOneAndUpdate({ _id: userId }, { $unset: { tag: "" } },
+        const user = await userSchema.findOneAndUpdate({ _id: userId }, { $unset: { specialTag: "" } },
             { new: true });
         if (!user) {
             return res.status(404).json({
