@@ -932,7 +932,10 @@ exports.getAllUser = async (req, res) => {
           isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
           Id: { $arrayElemAt: ["$User.Id", 0] },
           tag: { $arrayElemAt: ["$User.tag", 0] },
-          specialTag: { $arrayElemAt: ["$User.specialTag", 0] }
+          specialTag: { $arrayElemAt: ["$User.specialTag", 0] },
+          bio: { $arrayElemAt: ["$UserProf.bio", 0] },
+          language: { $arrayElemAt: ["$UserProf.language", 0] },
+          descSelf: { $arrayElemAt: ["$UserProf.descSelf", 0] },
         }
       }
     ])
@@ -1286,6 +1289,8 @@ exports.editprofile = async (req, res) => {
           favBroadcaster: body.favBroadcaster || user.favBroadcaster,
           profileImage: cloud.secure_url.split("upload/")[1],
           bio: body.bio || user.bio,
+          language: body.language || user.language,
+          descSelf: body.descSelf || user.descSelf,
         };
       
       }
@@ -1295,8 +1300,9 @@ exports.editprofile = async (req, res) => {
           dateOfBirth: body.dateOfBirth || user.dateOfBirth,
           gender: body.gender || user.gender,
           favBroadcaster: body.favBroadcaster || user.favBroadcaster,
-
           bio: body.bio || user.bio,
+          language: body.language || user.language,
+          descSelf: body.descSelf || user.descSelf,
         };
       }
     

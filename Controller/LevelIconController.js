@@ -19,6 +19,7 @@ exports.uploadLevelIcon = async (req, res) => {
                 message: "Level Icon required"
             })
         }
+        // const toBase64 = 
         const cloud = await cloudinary.uploader.upload(req.file.path, {
             folder: "levelIcons"
         })
@@ -53,7 +54,7 @@ exports.getLevelIcons = async (req, res) => {
 
 exports.getSpeficesLevelIcons = async (req, res) => {
     try {
-        const getIcons = await LevelIconSchema.findOne({serialNo:req.body.serialNo});
+        const getIcons = await LevelIconSchema.findOne({ serialNo: req.body.serialNo });
         return res.status(200).json({
             data: getIcons
         })
@@ -78,16 +79,22 @@ exports.updateLevelIcon = async (req, res) => {
             })
         }
 
-        const data = await LevelIconSchema.findById({ _id: iconId });
+        const data = await LevelIconSchema.findById(iconId);
         if (!data) {
-            return res.status(400).json({
+            return res.status(404).json({
                 message: "Level Icon not found"
-            })
+            });
         }
+
         const cloud = await cloudinary.uploader.upload(req.file.path, {
             folder: "levelIcons"
         })
-        console.log(cloud.secure_url.split("upload/")[1])
+        if (!cloud || !cloud.secure_url) {
+            return res.status(500).json({
+                message: "Failed to upload to Cloudinary"
+            });
+        }
+        // console.log(cloud.secure_url.split("upload/")[1])
         data.levelIcon = cloud.secure_url.split("upload/")[1]
 
         await data.save();
@@ -96,6 +103,8 @@ exports.updateLevelIcon = async (req, res) => {
         })
 
     } catch (err) {
+         console.error("Error:", err);
+
         return res.status(500).json({
             message: err.message
         })

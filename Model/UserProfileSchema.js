@@ -42,8 +42,8 @@ const userprofileSchema = new mongoose.Schema({
   },
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
-  friends:[{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
-  visitors:[{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
+  visitors: [{ type: mongoose.Schema.Types.ObjectId, ref: "userprofiles" }],
 
   isBlocked: {
     type: Boolean,
@@ -58,7 +58,15 @@ const userprofileSchema = new mongoose.Schema({
     type: String,
     required: false,
     enum: ["7 days", "14 days", "1 month", "permanent"],
+  },
+  language: {
+    type: String
+  },
+  descSelf: {
+    type: String
   }
+
+
 
 
 
