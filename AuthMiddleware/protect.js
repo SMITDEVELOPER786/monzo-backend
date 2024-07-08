@@ -2,10 +2,12 @@ const userScheema = require("../Model/userSchema");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const AdminSchema = require("../Model/AdminSchema");
+require("dotenv").config()
+
 
 const protect = asyncHandler(async (req, res, next) => {
   try {
-    const token = req.headers.authorization && req.headers.authorization.split(" ")[1]; 
+    const token = req.headers.authorization && req.headers.authorization.split(" ")[1];
     if (!token) {
       res.status(402);
       throw new Error("Not Authorized, please login");
@@ -13,7 +15,6 @@ const protect = asyncHandler(async (req, res, next) => {
 
 
     const verified = jwt.verify(token, process.env.secret_key);
-    console.log(verified);
 
     const user = await userScheema.findById(verified.userId).select("-password");
     if (!user) {
@@ -24,46 +25,55 @@ const protect = asyncHandler(async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error("Error:", error); 
-    res.status(402).json({ message: "Not Authorized, please login" }); 
+    console.error("Error:", error);
+    res.status(402).json({ message: "Not Authorized, please login" });
   }
 });
 
 const protectAdmin = asyncHandler(async (req, res, next) => {
   try {
-    const token = req.headers.authorization && req.headers.authorization.split(" ")[1]; 
-    if (!token) {
-      res.status(402);
-      throw new Error("Not Authorized, please login as admin");
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Not authorized, no token' });
     }
 
-    const verify = jwt.verify(token, process.env.secret_key)
+    const token = authHeader.split(' ')[1];
 
-    const user = await AdminSchema.findById(verify.userId).select("-password");
+    if (!token) {
+      return res.status(401).json({ message: 'Not authorized, token missing' });
+    }
+    // console.log("process.env.secret_key", process.env.secret_key);
+    // console.log("token", token)
+    let decoded;
+    try {
+      decoded = await jwt.verify(token, process.env.secret_key);
+    } catch (err) {
+      // console.log("decoded", decoded)
+      return res.status(401).json({ message: 'Not authorized, token failed', err });
+    }
+
+
+    const user = await AdminSchema.findById(decoded.userId).select('-password');
 
     if (!user) {
-      res.status(402);
-      throw new Error("User Not Found");
+      return res.status(404).json({ message: 'User not found' });
     }
-    if (user.role !== "admin") {
-      res.status(402);
-      throw new Error("you are not admin. login as admin");
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'You are not an admin. Please log in as an admin.' });
     }
 
     req.user = user;
     next();
-
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
-  catch (err) {
-    return res.status(500).json({
-      message: err.message
-    })
-  }
-})
+});
 
 const protectSubAdmin = asyncHandler(async (req, res, next) => {
   try {
-    const token = req.headers.authorization && req.headers.authorization.split(" ")[1]; 
+    const token = req.headers.authorization && req.headers.authorization.split(" ")[1];
     if (!token) {
       res.status(402);
       throw new Error("Not Authorized, please login as sub admin");

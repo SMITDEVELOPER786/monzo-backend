@@ -6,6 +6,7 @@ const giveGuardian = new mongoose.Schema({
     guardianId: { type: mongoose.Schema.Types.ObjectId, ref: "guardians" },
     guardianType: { type: String },
     guardianDuration: { type: String },
+    guardianCoins: { type: Number },
 }, { timestamps: true })
 
 module.exports = mongoose.model("giveguardian", giveGuardian);

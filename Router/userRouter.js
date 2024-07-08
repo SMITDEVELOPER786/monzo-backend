@@ -60,7 +60,7 @@ router.get("/get-followers", userController.getFollowersUsers)
 router.get("/get-broadcaster", userController.getAllBroadCasters)
 router.get("/get-banner", BannerController.getBanners)
 router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
-router.post("/get-level-icon",userController.getSpeficesLevelIcons)
+router.post("/get-level-icon", userController.getSpeficesLevelIcons)
 
 router.use("/reel", reelRouter);
 router.use("/live-stream", protect, LiveStreamRouter);

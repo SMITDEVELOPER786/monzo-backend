@@ -134,23 +134,23 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.socialAuthApi =async(req,res)=>{
-  const {  accessToken, socialType } = req.body;
+exports.socialAuthApi = async (req, res) => {
+  const { accessToken, socialType } = req.body;
   console.log(socialType)
-  const result = accessTokenValidator(accessToken,socialType)
+  const result = accessTokenValidator(accessToken, socialType)
   const { hasError, message, data } = await accessTokenValidator(accessToken, socialType);
   console.log(data)
-  if(hasError){
-    return  res.status(200).json({
+  if (hasError) {
+    return res.status(200).json({
       message: message,
-      error:hasError,
-      data:data
+      error: hasError,
+      data: data
     });
 
   }
-  const checkemail = await userSchema.findOne({email: data.identifier });
+  const checkemail = await userSchema.findOne({ email: data.identifier });
   if (checkemail) {
-    
+
     if (!checkemail.isVerify) {
       return res.status(400).json({
         message: "Account is not verified. Please verify your account.",
@@ -168,10 +168,10 @@ exports.socialAuthApi =async(req,res)=>{
         expiresIn: "4h",
       });
 
-      const findProfile = await userprofileSchema.findOne({authId:checkemail._id})
-      
-      if(findProfile){
-        checkemail.ProfileId= findProfile
+      const findProfile = await userprofileSchema.findOne({ authId: checkemail._id })
+
+      if (findProfile) {
+        checkemail.ProfileId = findProfile
 
       }
 
@@ -184,7 +184,7 @@ exports.socialAuthApi =async(req,res)=>{
         token: token,
       });
     }
-  } 
+  }
 
 
   let count = await userScheema.countDocuments().exec();
@@ -231,7 +231,7 @@ exports.socialAuthApi =async(req,res)=>{
       message: "User registered successfully",
       error: false,
       data: { user: savedUser, profile: savedUserProfile },
-      token:token
+      token: token
     });
   } catch (err) {
     return res.status(500).json({
@@ -241,7 +241,7 @@ exports.socialAuthApi =async(req,res)=>{
     });
   }
 
-  
+
 
 
 }
@@ -482,10 +482,10 @@ exports.login = async (req, res) => {
           expiresIn: "4h",
         });
 
-        const findProfile = await userprofileSchema.findOne({authId:checkemail._id})
+        const findProfile = await userprofileSchema.findOne({ authId: checkemail._id })
         console.log(findProfile)
-        if(findProfile){
-          checkemail.ProfileId= findProfile
+        if (findProfile) {
+          checkemail.ProfileId = findProfile
 
         }
 
@@ -780,14 +780,14 @@ exports.Myprofile = async (req, res) => {
 exports.getSpeficesLevelIcons = async (req, res) => {
   try {
     console.log(req.body.serialNo)
-      const getIcons = await LevelIconSchema.findOne({serialNo:req.body.serialNo});
-      return res.status(200).json({
-          data: getIcons
-      })
+    const getIcons = await LevelIconSchema.findOne({ serialNo: req.body.serialNo });
+    return res.status(200).json({
+      data: getIcons
+    })
   } catch (err) {
-      return res.status(500).json({
-          message: err.message
-      })
+    return res.status(500).json({
+      message: err.message
+    })
   }
 }
 
@@ -1277,12 +1277,12 @@ exports.editprofile = async (req, res) => {
     if (user && user.isCompleteProfile === true) {
       console.log(req.file)
       // Check if user's profile is already complete
-      if (req.file!=undefined) {
+      if (req.file != undefined) {
         body.profileImage = req.file.path;
         const cloud = await cloudinary.uploader.upload(req.file.path, {
           folder: 'profileImage', // Set the folder where the image will be stored in Cloudinary
         });
-         updateFields = {
+        updateFields = {
           username: body.username || user.username,
           dateOfBirth: body.dateOfBirth || user.dateOfBirth,
           gender: body.gender || user.gender,
@@ -1292,10 +1292,10 @@ exports.editprofile = async (req, res) => {
           language: body.language || user.language,
           descSelf: body.descSelf || user.descSelf,
         };
-      
+
       }
-      else{
-         updateFields = {
+      else {
+        updateFields = {
           username: body.username || user.username,
           dateOfBirth: body.dateOfBirth || user.dateOfBirth,
           gender: body.gender || user.gender,
@@ -1305,7 +1305,7 @@ exports.editprofile = async (req, res) => {
           descSelf: body.descSelf || user.descSelf,
         };
       }
-    
+
 
       await userprofileSchema.findOneAndUpdate(
         { authId: req.userId },
@@ -1418,7 +1418,7 @@ exports.unBanUser = async (req, res) => {
       // ------ add for sub-admin activity ---------
       console.log(isAdmin)
       console.log(!isAdmin)
-      
+
       !isAdmin && await SubAdminActivitySchema({
         subAdminId: req.user._id,
         performedAction: "unban User",
