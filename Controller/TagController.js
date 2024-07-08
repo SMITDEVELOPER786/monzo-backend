@@ -1,4 +1,14 @@
 const userSchema = require("../Model/userSchema");
+require("dotenv").config();
+const secretkey = process.env.secret_key;
+
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 
 exports.addUserTag = async (req, res) => {
     try {
@@ -68,20 +78,23 @@ exports.deleteAssignTag = async (req, res) => {
 
 exports.assignSpecialTag = async (req, res) => {
     try {
-        const { userId, specialTag } = req.body;
-        if (!userId || !specialTag) {
+        const { userId } = req.body;
+        if (!userId || !req.file) {
             return res.status(400).json({
-                message: "User id and specialTag are required"
+                message: "User id and specialTag image are required"
             })
         }
-        const user = await userSchema.findOneAndUpdate({ _id: userId }, { $set: { specialTag } });
+        const cloud = await cloudinary.uploader.upload(req.file.path, {
+            folder: "specialIcon"
+        })
+        const user = await userSchema.findOneAndUpdate({ _id: userId }, { $set: { specialTag: cloud.secure_url.split("upload/")[1] } });
         if (!user) {
             return res.status(404).json({
                 message: "User not found"
             })
         }
         return res.status(200).json({
-            message: "Special Tag added successfully"
+            message: "Special Tag Icon added successfully"
         })
     } catch (err) {
         return res.status(500).json({

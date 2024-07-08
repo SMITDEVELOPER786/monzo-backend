@@ -50,7 +50,7 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
       decoded = await jwt.verify(token, process.env.secret_key);
     } catch (err) {
       // console.log("decoded", decoded)
-      return res.status(401).json({ message: 'Not authorized, token failed', err });
+      return res.status(401).json({ message: 'Sorry, token expired' });
     }
 
 

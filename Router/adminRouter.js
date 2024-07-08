@@ -84,9 +84,9 @@ router.put("/tag/update", protectAdmin, TagController.addUserTag)
 router.delete("/tag/delete", protectAdmin, TagController.deleteAssignTag)
 
 // special tag option
-router.post("/special-tag/assign", protectAdmin, TagController.assignSpecialTag)
+router.post("/special-tag/assign", upload.single("specialIcon"), protectAdmin, TagController.assignSpecialTag)
 router.get("/special-tag", protectAdmin, TagController.getAssignSpecialTags)
-router.put("/special-tag/update", protectAdmin, TagController.assignSpecialTag)
+router.put("/special-tag/update", upload.single("specialIcon"), protectAdmin, TagController.assignSpecialTag)
 router.delete("/special-tag/delete", protectAdmin, TagController.deleteAssignSpecialTag)
 
 

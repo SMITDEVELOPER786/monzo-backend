@@ -152,8 +152,6 @@ const getCoinHistory = async (token) => {
 exports.giveGuardian = async (req, res) => {
     try {
         const { senderId, recieverId, guardianId, guardianType, guardianDuration } = req.body;
-        // const { authorization } = req.headers;
-        // console.log("req.headers.Authorization", authorization)
 
         if (!guardianId) {
             return res.status(400).json({
@@ -194,7 +192,6 @@ exports.giveGuardian = async (req, res) => {
             });
         }
 
-        // Uncomment if necessary
         if (!senderUser.isReseller || !recieverUser.isReseller) {
             return res.status(404).json({
                 message: "sender & receiver are not resellers"
