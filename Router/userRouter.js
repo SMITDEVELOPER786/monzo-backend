@@ -12,6 +12,8 @@ const adminRouter = require("./adminRouter.js")
 const subAdminRouter = require("./subAdminRouter.js")
 const agencyRouter = require("./agencyRouter.js");
 const BannerController = require("../Controller/BannerController")
+const GuardianController = require("../Controller/GuardianController")
+const GiftController = require("../Controller/GiftController")
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -61,10 +63,14 @@ router.get("/get-broadcaster", userController.getAllBroadCasters)
 router.get("/get-banner", BannerController.getBanners)
 router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
 router.post("/get-level-icon", userController.getSpeficesLevelIcons)
+router.post("/guardian/give", protect, GuardianController.giveGuardian);
+router.post("/gift/send", GiftController.sendGift)
+
 
 router.use("/reel", reelRouter);
 router.use("/live-stream", protect, LiveStreamRouter);
 router.use("/agency", protect, agencyRouter);
+
 
 // for admin
 router.use("/admin", adminRouter)

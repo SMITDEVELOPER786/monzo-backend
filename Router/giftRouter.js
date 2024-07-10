@@ -20,7 +20,6 @@ const upload = multer({ storage: storage });
 
 router.post("/upload", upload.single("giftImg"), GiftController.uploadGift)
 router.delete("/delete",  GiftController.deleteGift)
-// router.post("/send", GiftController.sendGift)
 router.get("/get", protectAdmin, GiftController.getGifts)
 
 

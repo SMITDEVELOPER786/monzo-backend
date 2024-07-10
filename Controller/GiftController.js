@@ -61,15 +61,17 @@ exports.deleteGift = async (req, res) => {
 
 exports.sendGift = async (req, res) => {
     try {
-        const { senderId, recieverId } = req.body;
-        if (!req.file) {
-            return res.status(400).json({
-                message: "Gift Image not found...!"
-            })
-        }
+
+        const { senderId, recieverId, giftId } = req.body;
+        console.log(req.body)
         if (!senderId || !recieverId) {
             return res.status(400).json({
                 message: "Sender or Reciever ID not found...!"
+            })
+        }
+        if (!giftId) {
+            return res.status(400).json({
+                message: "Gift Id not found...!"
             })
         }
         if (senderId === recieverId) {
@@ -85,15 +87,32 @@ exports.sendGift = async (req, res) => {
                 message: "sender or reciever user not found"
             })
         }
+        const gift = await GiftSchema.findById({ _id: giftId })
+        if (!gift) {
+            return res.status(400).json({
+                message: "gift not found"
+            })
+        }
 
-        const cloud = await cloudinary.uploader.upload(req.file.path, {
-            folder: "giftImg"
-        })
+        // if (!req.file) {
+        //     return res.status(400).json({
+        //         message: "Gift Image not found...!"
+        //     })
+        // }
+
+        // const cloud = await cloudinary.uploader.upload(req.file.path, {
+        //     folder: "giftImg"
+        // })
+
         senderUser.isLevel += 5;
         recvUser.isLevel += 3;
         await senderUser.save(), recvUser.save();
-        req.body.giftImg = cloud.secure_url.split("upload/")[1],
-            await GiftSchema(req.body).save();
+        gift.senderId.push(senderId);
+        gift.recieverId.push(recieverId);
+
+        console.log(gift)
+        // req.body.giftImg = cloud.secure_url.split("upload/")[1],
+        await gift.save();
 
         return res.status(200).json({
             message: "Gift sent succesfully"

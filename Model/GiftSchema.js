@@ -1,29 +1,27 @@
 const mongoose = require("mongoose");
 
 const GiftSchema = new mongoose.Schema({
-    senderId: {
+    senderId: [{
         type: mongoose.Schema.Types.ObjectId, ref: "users",
-        // required: true
-    },
-    recieverId: {
+    }],
+    recieverId: [{
         type: mongoose.Schema.Types.ObjectId, ref: "users",
-        // required: true
-    },
+    }],
     giftImg: {
         type: String,
-        required: true
+        required: false
     },
     giftCategory: {
         type: String,
-        required: true
+        required: false
     },
     giftValue: {
         type: String,
-        required: true
+        required: false
     },
     giftName: {
         type: String,
-        required: true
+        required: false
     }
 })
 

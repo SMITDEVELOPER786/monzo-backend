@@ -65,7 +65,6 @@ router.post("/guardian/create", protectAdmin, upload.single("guardianImg"), Guar
 router.get("/guardian/", GuardianController.getGuardian);
 router.put("/guardian/update", protectAdmin, upload.single("guardianImg"), GuardianController.updateGuardian);
 router.delete("/guardian/delete", protectAdmin, GuardianController.deleteGuardian);
-router.post("/guardian/give", protectAdmin, GuardianController.giveGuardian);
 
 // backgroud image
 router.post("/bgImg/upload", protectAdmin, upload.single("bgImg"), AdminController.uploadBackground)
