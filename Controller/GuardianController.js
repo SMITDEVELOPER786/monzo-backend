@@ -29,7 +29,7 @@ exports.createGuardian = async (req, res) => {
             })
         }
         const checkGuard = await GuardianSchema.findOne({ guardianType });
-        if (checkGuard.guardianType === guardianType) {
+        if (checkGuard?.guardianType === guardianType) {
             return res.status(400).json({
                 message: `${guardianType} is already added`
             })
@@ -39,7 +39,6 @@ exports.createGuardian = async (req, res) => {
         })
         req.body.guardianImg = cloud.secure_url.split("upload/")[1];
         parseInt(guardianCoin)
-
         await GuardianSchema(req.body).save();
         return res.status(200).json({
             message: "Guardian added successfully..!"
@@ -67,22 +66,25 @@ exports.getGuardian = async (req, res) => {
 
 exports.updateGuardian = async (req, res) => {
     try {
-        const { guardianCoin, guardianId } = req.body;
+        const { guardianId, guardianType } = req.body;
         if (!guardianId) {
             return res.status(400).json({
                 message: "guardianId is required..!"
             })
         }
-        const checkGuard = await GuardianSchema.findById({ _id: guardianId })
+        const checkGuard = await GuardianSchema.find({ guardianType })
         if (!checkGuard) {
             return res.status(404).json({
                 message: "guardian not found"
             });
         }
-        if (!guardianCoin) {
-            return res.status(400).json({
-                message: "guardianCoin are required..!"
-            })
+        // console.log(checkGuard)
+        for (const guard of checkGuard) {
+            if (guardianType == guard?.guardianType && guardianId !== guard._id) {
+                return res.status(400).json({
+                    message: `${guardianType} is already added`
+                })
+            }
         }
         if (req.file) {
             const cloud = await cloudinary.uploader.upload(req.file.path, {
@@ -90,8 +92,22 @@ exports.updateGuardian = async (req, res) => {
             })
             req.body.guardianImg = cloud.secure_url.split("upload/")[1];
         }
-        console.log(req.body.guardianImg)
-        await GuardianSchema.findOneAndUpdate({ _id: guardianId }, req.body);
+        // console.log(req.body.guardianImg)
+
+        const updates = {};
+        for (const field in req.body) {
+            // console.log("field", req.body[field])
+            if (req.body[field] !== undefined && req.body[field] !== "" && req.body[field] !== null && req.body[field] !== '') {
+                updates[field] = req.body[field];
+            }
+
+        }
+
+        if (!Object.keys(updates).length) {
+            return res.status(400).json({ message: "No valid update fields provided" });
+        }
+
+        await GuardianSchema.findOneAndUpdate({ _id: guardianId }, updates);
         return res.status(200).json({
             message: "Guardian updated successfully..!"
         })
@@ -151,7 +167,7 @@ const getCoinHistory = async (token) => {
 
 exports.giveGuardian = async (req, res) => {
     try {
-        const { senderId, recieverId, guardianId, guardianType, guardianDuration } = req.body;
+        const { senderId, recieverId, guardianId, guardianDuration } = req.body;
 
         if (!guardianId) {
             return res.status(400).json({

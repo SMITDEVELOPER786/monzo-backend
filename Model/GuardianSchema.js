@@ -7,7 +7,7 @@ const guradianSchema = new mongoose.Schema({
         required: true
     },
     guardianCoin: {
-        type: Number,
+        type: String,
         required: true
     },
     guardianType: {
