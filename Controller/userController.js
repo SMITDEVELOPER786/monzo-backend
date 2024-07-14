@@ -1307,14 +1307,14 @@ exports.editprofile = async (req, res) => {
       }
 
 
-      await userprofileSchema.findOneAndUpdate(
+      const userProf = await userprofileSchema.findOneAndUpdate(
         { authId: req.userId },
         updateFields
       );
 
       return res.status(200).json({
         message: "Profile updated",
-        data: updateFields,
+        data: userProf,
       });
     } else {
       return res.status(400).json({
