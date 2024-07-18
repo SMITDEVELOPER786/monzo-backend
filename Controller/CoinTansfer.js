@@ -57,9 +57,9 @@ exports.getCoinsHistory = async (req, res) => {
         //     return res.status(400).json({
         //         message: "senderId is required"
         //     })
-        // console.log(req.user)
+        console.log(req.user)
         const data = await CoinTransferSchema.aggregate([
-            { $match: { senderId: req.user._id } },
+            { $match: req.user.role !== "admin" ? { senderId: req.user._id }:{} },
             {
                 $lookup: {
                     let: { id: "$senderId" },
@@ -152,7 +152,7 @@ exports.getCoinsHistory = async (req, res) => {
 
         return res.status(200).json({
             data,
-            length:data.length
+            length: data.length
         })
     } catch (err) {
         return res.status(500).json({

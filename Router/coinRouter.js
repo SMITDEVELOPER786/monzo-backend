@@ -11,6 +11,6 @@ router.get("/", CoinController.coinHistoryChecker);
 router.post("/make-reseller", userController.makeUserReseller);
 router.post("/refund", CoinController.coinRefund)
 // ----------- coins transfer history
-router.get("/get", CoinTansfer.getCoinsHistory)
+router.get("/transfer-history", CoinTansfer.getCoinsHistory)
 
 module.exports = router
