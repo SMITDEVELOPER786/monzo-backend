@@ -53,9 +53,106 @@ exports.sendCoins = async (req, res) => {
 
 exports.getCoinsHistory = async (req, res) => {
     try {
-        const data = await CoinTransferSchema.find();
+        // if (!req.body.userId)
+        //     return res.status(400).json({
+        //         message: "senderId is required"
+        //     })
+        // console.log(req.user)
+        const data = await CoinTransferSchema.aggregate([
+            { $match: { senderId: req.user._id } },
+            {
+                $lookup: {
+                    let: { id: "$senderId" },
+                    from: "users",
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$_id", "$$id"] }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            $project: { email: 1, Id: 1, country: 1 }
+                        }
+                    ],
+                    as: "sender"
+                }
+            },
+            {
+                $lookup: {
+                    from: "userprofiles",
+                    let: { id: "$senderId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$authId", "$$id"] }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            $project: { username: 1, profileImage: 1 }
+                        }
+                    ],
+                    as: "senderProfile"
+                }
+            },
+            {
+                $lookup: {
+                    let: { id: "$recieverId" },
+                    from: "users",
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$_id", "$$id"] }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            $project: { email: 1, Id: 1, country: 1 }
+                        }
+                    ],
+                    as: "reciever"
+                }
+            },
+            {
+                $lookup: {
+                    from: "userprofiles",
+                    let: { id: "$recieverId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$authId", "$$id"] }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            $project: { username: 1, profileImage: 1 }
+                        }
+                    ],
+                    as: "recieverProfile"
+                }
+            },
+            { $unwind: "$sender" },
+            { $unwind: "$senderProfile" },
+            { $unwind: "$reciever" },
+            { $unwind: "$recieverProfile" }
+        ]);
+
         return res.status(200).json({
-            data
+            data,
+            length:data.length
         })
     } catch (err) {
         return res.status(500).json({

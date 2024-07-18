@@ -68,6 +68,9 @@ const userSchema = new mongoose.Schema({
   },
   specialTag: {
     type: String
+  },
+  coins: {
+    type: mongoose.Schema.Types.ObjectId, ref: "coins"
   }
 
 })

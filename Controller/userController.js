@@ -16,6 +16,7 @@ const AdminSchema = require("../Model/AdminSchema.js");
 const SubAdminActivitySchema = require("../Model/SubAdminActivitySchema.js");
 const { accessTokenValidator } = require("../Validator/socialValidator.js");
 const LevelIconSchema = require("../Model/LevelIconSchema.js");
+const CoinSchema = require("../Model/CoinSchema.js");
 // const UserProfileSchema = require("../Model/UserProfileSchema.js");
 require("dotenv").config();
 const otpStorage = {};
@@ -483,13 +484,17 @@ exports.login = async (req, res) => {
         });
 
         const findProfile = await userprofileSchema.findOne({ authId: checkemail._id })
-        console.log(findProfile)
+        // console.log(findProfile)
         if (findProfile) {
           checkemail.ProfileId = findProfile
-
+        }
+        const coins = await CoinSchema.findOne({ userId :  checkemail._id})
+        console.log(coins)
+        if (coins) {
+          checkemail.coins = coins
         }
 
-        console.log(token);
+        // console.log(token);
         return res.status(200).json({
           message: "login Successfully ",
           data: checkemail,

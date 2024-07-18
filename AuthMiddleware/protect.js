@@ -53,11 +53,11 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
       return res.status(401).json({ message: 'Sorry, token expired' });
     }
 
-
+    // console.log("decoded.userId", decoded.userId)
     const user = await AdminSchema.findById(decoded.userId).select('-password');
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'Admin not found' });
     }
 
     if (user.role !== 'admin') {
