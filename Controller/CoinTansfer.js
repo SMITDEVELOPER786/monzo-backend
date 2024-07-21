@@ -4,7 +4,8 @@ const userSchema = require("../Model/userSchema");
 
 exports.sendCoins = async (req, res) => {
     try {
-        const { senderId, recieverId, coins } = req.body;
+        const { recieverId, coins } = req.body;
+        const senderId = req.user._id
         if (!senderId || !recieverId)
             return res.status(400).json({
                 message: "sender or reciever ID's not found"
@@ -19,10 +20,14 @@ exports.sendCoins = async (req, res) => {
         const senderCoin = await CoinSchema.findOne({ userId: senderId });
         const recieverCoin = await CoinSchema.findOne({ userId: recieverId });
 
-        if (!sender || !reciever || !senderCoin || !recieverCoin)
+        if (!sender || !reciever || !senderCoin)
             return res.status(400).json({
-                message: "sender or reciever user or coins not found"
+                message: "sender user coins not found"
             })
+        if (!recieverCoin) {
+            recieverCoin = new CoinSchema({ userId: recieverId, coins: 0 });
+            await recieverCoin.save();
+        }
         if (!coins)
             return res.status(400).json({
                 message: "Coins not found"
@@ -59,7 +64,7 @@ exports.getCoinsHistory = async (req, res) => {
         //     })
         console.log(req.user)
         const data = await CoinTransferSchema.aggregate([
-            { $match: req.user.role !== "admin" ? { senderId: req.user._id }:{} },
+            { $match: req.user.role !== "admin" ? { senderId: req.user._id } : {} },
             {
                 $lookup: {
                     let: { id: "$senderId" },

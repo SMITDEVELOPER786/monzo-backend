@@ -65,6 +65,7 @@ router.get("/get-banner", BannerController.getBanners)
 router.put("/edit-profile", upload.single("profileImage"), protect, userController.editprofile)
 router.post("/get-level-icon", userController.getSpeficesLevelIcons)
 router.post("/guardian/give", protect, GuardianController.giveGuardian);
+router.get("/gift", GiftController.getGifts)
 router.post("/gift/send", GiftController.sendGift)
 router.post("/coin/send", protect, CoinTansfer.sendCoins)
 router.get("/coin/get", protect, CoinTansfer.getCoinsHistory)
