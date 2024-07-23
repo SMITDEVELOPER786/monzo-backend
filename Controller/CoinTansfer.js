@@ -36,7 +36,8 @@ exports.sendCoins = async (req, res) => {
             return res.status(400).json({
                 message: "sender coin is greater than reciever coins"
             })
-
+        console.log(senderCoin)
+        req.body.senderId = senderCoin.userId
         senderCoin.coins -= coins
         recieverCoin.coins += coins
         await senderCoin.save();
