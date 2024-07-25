@@ -18,7 +18,7 @@ exports.sendCoins = async (req, res) => {
         const sender = await userSchema.findById(senderId);
         const reciever = await userSchema.findById(recieverId);
         const senderCoin = await CoinSchema.findOne({ userId: senderId });
-        const recieverCoin = await CoinSchema.findOne({ userId: recieverId });
+        let recieverCoin = await CoinSchema.findOne({ userId: recieverId });
 
         if (!sender || !senderCoin)
             return res.status(400).json({
