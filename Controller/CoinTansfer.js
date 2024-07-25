@@ -20,10 +20,15 @@ exports.sendCoins = async (req, res) => {
         const senderCoin = await CoinSchema.findOne({ userId: senderId });
         const recieverCoin = await CoinSchema.findOne({ userId: recieverId });
 
-        if (!sender || !reciever || !senderCoin)
+        if (!sender || !senderCoin)
             return res.status(400).json({
                 message: "sender user coins not found"
             })
+        if (!reciever) {
+            return res.status(400).json({
+                message: "Rciever user not found"
+            })
+        }
         if (!recieverCoin) {
             recieverCoin = new CoinSchema({ userId: recieverId, coins: 0 });
             await recieverCoin.save();

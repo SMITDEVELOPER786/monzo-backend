@@ -488,7 +488,7 @@ exports.login = async (req, res) => {
         if (findProfile) {
           checkemail.ProfileId = findProfile
         }
-        const coins = await CoinSchema.findOne({ userId :  checkemail._id})
+        const coins = await CoinSchema.findOne({ userId: checkemail._id })
         console.log(coins)
         if (coins) {
           checkemail.coins = coins
@@ -1118,23 +1118,14 @@ exports.SearchUser = async (req, res) => {
     // });
 
 
-    var data = await userprofileSchema.aggregate([
+    var data = await userSchema.aggregate([
       {
-        $match: {
-          $or: [
-            {
-              username: {
-                $regex: new RegExp(name, "i"), // Case-insensitive search
-              },
-            },
-            // You can add more conditions here for the aggregation pipeline
-          ],
-        }
+        $match: {}
       },
       {
         $lookup: {
           from: "users",
-          let: { id: "$authId" },
+          let: { id: "$_id" },
           pipeline: [{
             $match: {
               $expr: {
@@ -1153,7 +1144,7 @@ exports.SearchUser = async (req, res) => {
           pipeline: [{
             $match: {
               $expr: {
-                $and: { $eq: ["$_id", "$$id"] }
+                $and: { $eq: ["$authId", "$$id"] }
               }
             }
           },
@@ -1163,16 +1154,16 @@ exports.SearchUser = async (req, res) => {
       },
       {
         $project: {
-          isBan: { $arrayElemAt: ["$UserProf.isBan", 0] },
+          isBan: { $arrayElemAt: ["$User.isBan", 0] },
+          isReseller: { $arrayElemAt: ["$User.isReseller", 0] },
           banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
           isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
           username: { $arrayElemAt: ["$UserProf.username", 0] },
           dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
           profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
           gender: { $arrayElemAt: ["$UserProf.gender", 0] },
-          isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
+          // isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
           Id: { $arrayElemAt: ["$User.Id", 0] },
-          // username: { $arrayElemAt: ["$UserProf.username", 0] },
         }
       }
     ]);
