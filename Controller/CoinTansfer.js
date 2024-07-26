@@ -37,11 +37,13 @@ exports.sendCoins = async (req, res) => {
             return res.status(400).json({
                 message: "Coins not found"
             })
-        if (senderCoin > coins)
+        // console.log("senderCoin:", senderCoin.coins)
+        // console.log("coins:", coins)
+        if (senderCoin.coins < 0 || senderCoin.coins < coins)
             return res.status(400).json({
-                message: "sender coin is greater than reciever coins"
+                message: "The amount of coins you are trying to send is greater than the amount available in your account."
             })
-        console.log(senderCoin)
+        // console.log(senderCoin)
         req.body.senderId = senderCoin.userId
         senderCoin.coins -= coins
         recieverCoin.coins += coins
@@ -49,9 +51,14 @@ exports.sendCoins = async (req, res) => {
         await recieverCoin.save();
         const coinTrans = await CoinTransferSchema(req.body).save();
 
+        const updatedTrans = {
+            ...coinTrans._doc,
+            remainingCoins: senderCoin.coins
+        };
         return res.status(200).json({
             message: "Coins transfered successfully",
-            data: coinTrans
+            data: updatedTrans
+
         })
 
 
