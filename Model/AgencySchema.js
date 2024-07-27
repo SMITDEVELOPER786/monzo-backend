@@ -13,7 +13,19 @@ const agencySchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    agencyImg: {
+    logo: {
+        type: String,
+        required: true
+    },
+    code: {
+        type: String,
+        required: true
+    },
+    passport: {
+        type: String,
+        required: true
+    },
+    name: {
         type: String,
         required: true
     },

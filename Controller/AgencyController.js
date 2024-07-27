@@ -12,11 +12,11 @@ cloudinary.config({
 
 exports.createAgency = async (req, res) => {
     try {
-        const { idCard, phone, email } = req.body
-        console.log(idCard, phone, email)
-        if (!idCard || !phone || !req.file || !email) {
+        const { idCard, phone, email, name, code, logo, passport } = req.body
+        // console.log(idCard, phone, email)
+        if (!idCard || !phone || !req.file || !email || !name || !code || !logo || !passport) {
             return res.status(400).json({
-                message: "idCard, phone, agencyImg, email are required"
+                message: "idCard, phone, agencyImg, email, name, code, logo, passport are required"
             })
         }
         const cloud = await cloudinary.uploader.upload(req.file.path, {
@@ -24,7 +24,7 @@ exports.createAgency = async (req, res) => {
         })
         req.body.status = "requested"
         req.body.userId = req.user._id
-        req.body.agencyImg = cloud.secure_url.split("upload/")[1]
+        req.body.logo = cloud.secure_url.split("upload/")[1]
         const agency = await AgencySchema(req.body).save();
         return res.status(200).json({
             data: agency,
