@@ -9,6 +9,7 @@ const { protectAdmin } = require("../AuthMiddleware/protect");
 router.post("/transfer", CoinController.transferCoins);
 router.get("/", CoinController.coinHistoryChecker);
 router.post("/make-reseller", userController.makeUserReseller);
+router.post("/remove-reseller", userController.removeUserReseller);
 router.post("/refund", CoinController.coinRefund)
 // ----------- coins transfer history
 router.get("/transfer-history", CoinTansfer.getCoinsHistory)

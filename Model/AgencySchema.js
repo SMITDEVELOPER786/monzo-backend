@@ -13,7 +13,7 @@ const agencySchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    logo: {
+    agencyImg: {
         type: String,
         required: true
     },
@@ -33,11 +33,16 @@ const agencySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    userId: {
+    owner: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true
-    }
+    },
+    joinedUsers: [{
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    }]
 })
 
 module.exports = mongoose.model("agency", agencySchema)

@@ -1,3 +1,4 @@
+const CoinSchema = require("../Model/CoinSchema");
 const GiftSchema = require("../Model/GiftSchema");
 const userSchema = require("../Model/userSchema");
 require("dotenv").config();
@@ -62,11 +63,10 @@ exports.deleteGift = async (req, res) => {
 exports.sendGift = async (req, res) => {
     try {
 
-        const { senderId, recieverId, giftId } = req.body;
-        console.log(req.body)
-        if (!senderId || !recieverId) {
+        const { recieverId, giftId } = req.body;
+        if (!recieverId) {
             return res.status(400).json({
-                message: "Sender or Reciever ID not found...!"
+                message: "Reciever ID not found...!"
             })
         }
         if (!giftId) {
@@ -74,13 +74,16 @@ exports.sendGift = async (req, res) => {
                 message: "Gift Id not found...!"
             })
         }
-        if (senderId === recieverId) {
+        // console.log(req.user._id.toString())
+        // console.log(recieverId)
+        if (req.user._id.toString() === recieverId) {
             return res.status(400).json({
                 message: "Sender or Reciever ID can't be same...!"
             })
         }
         // check that users are present
-        const senderUser = await userSchema.findById({ _id: senderId });
+        const senderUser = await userSchema.findById(req.user._id);
+        const senderCoins = await CoinSchema.findOne({ userId: req.user._id });
         const recvUser = await userSchema.findById({ _id: recieverId });
         if (!senderUser || !recvUser) {
             return res.status(404).json({
@@ -93,24 +96,22 @@ exports.sendGift = async (req, res) => {
                 message: "gift not found"
             })
         }
+        if (senderCoins.coins < gift.giftValue) {
+            return res.status(400).json({
+                message: "Insufficient Sender Coins"
+            })
+        }
+        // console.log("senderCoins", senderCoins)
 
-        // if (!req.file) {
-        //     return res.status(400).json({
-        //         message: "Gift Image not found...!"
-        //     })
-        // }
 
-        // const cloud = await cloudinary.uploader.upload(req.file.path, {
-        //     folder: "giftImg"
-        // })
-
+        senderCoins.coins -= parseInt(gift.giftValue);
         senderUser.isLevel += 5;
         recvUser.isLevel += 3;
-        await senderUser.save(), recvUser.save();
-        gift.senderId.push(senderId);
+        await senderUser.save(), recvUser.save()  , senderCoins.save();
+        gift.senderId.push(req.user._id);
         gift.recieverId.push(recieverId);
 
-        console.log(gift)
+        // console.log(gift)
         // req.body.giftImg = cloud.secure_url.split("upload/")[1],
         await gift.save();
 

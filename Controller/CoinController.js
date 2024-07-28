@@ -49,12 +49,30 @@ exports.coinHistoryChecker = async (req, res) => {
                         },
                         { $project: { username: 1, } }
                     ],
+                    as: "UserProf",
+                }
+            },
+            {
+                $lookup: {
+                    let: { id: "$userId" },
+                    from: "users",
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: { $eq: ["$_id", "$$id"] }
+                                }
+                            },
+                        },
+                        { $project: { isReseller: 1, } }
+                    ],
                     as: "User",
                 }
             },
             {
-                $unwind: "$User"
-            },
+                $unwind: "$UserProf",
+                $unwind: "$User",
+            }, 
         ])
 
         return res.status(200).json({

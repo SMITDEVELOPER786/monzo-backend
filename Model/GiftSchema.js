@@ -16,7 +16,7 @@ const GiftSchema = new mongoose.Schema({
         required: false
     },
     giftValue: {
-        type: String,
+        type: Number,
         required: false
     },
     giftName: {
