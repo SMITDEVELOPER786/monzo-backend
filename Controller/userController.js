@@ -929,6 +929,7 @@ exports.getAllUser = async (req, res) => {
           isBan: { $arrayElemAt: ["$UserProf.isBan", 0] },
           banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
           isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
+          email: { $arrayElemAt: ["$User.email", 0] },
           isReseller: { $arrayElemAt: ["$User.isReseller", 0] },
           username: { $arrayElemAt: ["$UserProf.username", 0] },
           dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },

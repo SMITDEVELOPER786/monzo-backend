@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/create", upload.fields([{ name: 'agencyImg', maxCount: 1 }, { name: 'passport', maxCount: 1 }]), AgencyController.createAgency);
+router.post("/create", upload.fields([{ name: 'agencyImg', maxCount: 1 }, { name: 'passport', maxCount: 1 }, { name: "photoId", maxCount: 1 }]), AgencyController.createAgency);
 
 router.post("/join", AgencyController.joinAgency)
 

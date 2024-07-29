@@ -42,7 +42,11 @@ const agencySchema = new mongoose.Schema({
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true
-    }]
+    }],
+    photoId: {
+        type: String,
+        required: true
+    }
 })
 
 module.exports = mongoose.model("agency", agencySchema)

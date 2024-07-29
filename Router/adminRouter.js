@@ -73,8 +73,9 @@ router.put("/bgImg/update/:id", protectAdmin, upload.single("bgImg"), AdminContr
 // agency
 router.post("/agency/accept", protectAdmin, AgencyController.acceptAgencyReq)
 router.post("/agency/reject", protectAdmin, AgencyController.rejectAgencyReq)
-router.get("/agency/get", protectAdmin, AgencyController.adminGetAgency)
+router.get("/agency/get",  AgencyController.adminGetAgency)
 router.put("/agency/chngeInfo", protectAdmin, upload.single("agencyImg"), AgencyController.agencyChngeInfo)
+router.delete("/agency/delete",  AgencyController.deleteAgency)
 
 // assign tag or model
 router.post("/tag/add", protectAdmin, TagController.addUserTag)

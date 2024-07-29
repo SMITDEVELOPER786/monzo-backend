@@ -29,10 +29,16 @@ exports.createAgency = async (req, res) => {
             folder: "passport"
         });
 
+        const photoId = await cloudinary.uploader.upload(req.files.photoId[0].path, {
+            folder: "photoId"
+        });
+
+
         req.body.status = "requested"
         req.body.owner = req.user._id
         req.body.agencyImg = agencyImg.secure_url.split("upload/")[1]
         req.body.passport = passport.secure_url.split("upload/")[1]
+        req.body.photoId = photoId.secure_url.split("upload/")[1]
         const agency = await AgencySchema(req.body).save();
         return res.status(200).json({
             data: agency,
@@ -120,7 +126,7 @@ exports.adminGetAgency = async (req, res) => {
             {
                 $lookup: {
                     from: "users",
-                    let: { id: "$userId" },
+                    let: { id: "$owner" },
                     pipeline: [
                         {
                             $match: {
@@ -139,7 +145,7 @@ exports.adminGetAgency = async (req, res) => {
             { $unwind: "$User" }
 
         ])
-        // const data = await AgencySchema.find();
+        // const data1 = await AgencySchema.find();
         return res.status(200).json({
             data
         })
@@ -202,6 +208,31 @@ exports.joinAgency = async (req, res) => {
         await agency.save();
         return res.status(200).json({
             message: "agency joined successfully"
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+exports.deleteAgency = async (req, res) => {
+    try {
+        const { agencyId } = req.body;
+        console.log(agencyId)
+        if (!agencyId) {
+            return res.status(400).json({
+                message: "agency id not found"
+            })
+        }
+        const checkAgency = await AgencySchema.findByIdAndDelete(agencyId)
+        if (!checkAgency) {
+            return res.status(404).json({
+                message: "agency not found"
+            })
+        }
+        return res.status(200).json({
+            message: "Agency deleted successfully"
         })
     } catch (err) {
         return res.status(500).json({
