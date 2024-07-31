@@ -1,5 +1,6 @@
 const CoinSchema = require("../Model/CoinSchema");
 const CoinTransferSchema = require("../Model/CoinTransferSchema");
+const UserProfileSchema = require("../Model/UserProfileSchema");
 const userSchema = require("../Model/userSchema");
 
 exports.sendCoins = async (req, res) => {
@@ -17,6 +18,7 @@ exports.sendCoins = async (req, res) => {
 
         const sender = await userSchema.findById(senderId);
         const reciever = await userSchema.findById(recieverId);
+        const recieverProf = await UserProfileSchema.findOne({ authId: recieverId });
         const senderCoin = await CoinSchema.findOne({ userId: senderId });
         let recieverCoin = await CoinSchema.findOne({ userId: recieverId });
 
@@ -24,7 +26,7 @@ exports.sendCoins = async (req, res) => {
             return res.status(400).json({
                 message: "sender user coins not found"
             })
-        if (!reciever) {
+        if (!reciever || !recieverProf) {
             return res.status(400).json({
                 message: "Rciever user not found"
             })
@@ -43,12 +45,14 @@ exports.sendCoins = async (req, res) => {
             return res.status(400).json({
                 message: "The amount of coins you are trying to send is greater than the amount available in your account."
             })
-        // console.log(senderCoin)
+        // console.log(sender)
         req.body.senderId = senderCoin.userId
         senderCoin.coins -= coins
         recieverCoin.coins += coins
+        recieverProf.diamonds += coins
         await senderCoin.save();
         await recieverCoin.save();
+        await recieverProf.save();
         const coinTrans = await CoinTransferSchema(req.body).save();
 
         const updatedTrans = {

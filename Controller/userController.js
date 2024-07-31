@@ -105,6 +105,7 @@ exports.signup = async (req, res) => {
       const paddedCount = String(count + 1).padStart(6, '0'); // Pad with zeros to ensure 6 digits
       console.log(paddedCount)
       const findId = await CustomIdSchema.findOne({ customId: paddedCount }) // is kam ko check krna hai db reset kr k (saim)
+      const findUserId = await userScheema.findOne({ Id: paddedCount }) // is kam ko check krna hai db reset kr k (saim)
       if (findId) req.body.Id = paddedCount + 1;
       else req.body.Id = paddedCount;
 

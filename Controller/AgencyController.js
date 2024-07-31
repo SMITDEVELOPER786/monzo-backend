@@ -12,30 +12,36 @@ cloudinary.config({
 
 exports.createAgency = async (req, res) => {
     try {
-        const { idCard, phone, email, name, code } = req.body
+        const { idCard, phone, email, name } = req.body
         console.log("passport", req.files.passport)
         console.log("agencyImg", req.files.agencyImg)
         console.log("req.file", req.files)
-        if (!idCard || !phone || !req.files || !email || !name || !code) {
+        console.log("req.file", req.file)
+        if (!idCard || !phone || !req.files || !email || !name) {
             return res.status(400).json({
-                message: "idCard, phone, agencyImg, email, name, code, are required"
+                message: "idCard, phone, agencyImg, email, name are required"
             })
         }
-        const agencyImg = await cloudinary.uploader.upload(req.files.agencyImg[0].path, {
+        if (!req.files.agencyImg || !req.files.passport || !req.files.photoId)
+            return res.status(400).json({
+                message: "Agency, passport, or photo ID image not found."
+            })
+        const agencyImg = await cloudinary.uploader.upload(req?.files?.agencyImg[0].path, {
             folder: "agencyImg"
         });
 
-        const passport = await cloudinary.uploader.upload(req.files.passport[0].path, {
+        const passport = await cloudinary.uploader.upload(req?.files?.passport[0].path, {
             folder: "passport"
         });
 
-        const photoId = await cloudinary.uploader.upload(req.files.photoId[0].path, {
+        const photoId = await cloudinary.uploader.upload(req?.files?.photoId[0].path, {
             folder: "photoId"
         });
 
-
+        console.log(req.user.Id)
         req.body.status = "requested"
         req.body.owner = req.user._id
+        req.body.code = req.user.Id
         req.body.agencyImg = agencyImg.secure_url.split("upload/")[1]
         req.body.passport = passport.secure_url.split("upload/")[1]
         req.body.photoId = photoId.secure_url.split("upload/")[1]
@@ -187,13 +193,13 @@ exports.agencyChngeInfo = async (req, res) => {
 
 exports.joinAgency = async (req, res) => {
     try {
-        const { agencyId } = req.body;
-        if (!agencyId) {
+        const { agencyCode } = req.body;
+        if (!agencyCode) {
             return res.status(400).json({
-                message: "agencyId not found"
+                message: "agencyCode not found"
             })
         }
-        const agency = await AgencySchema.findById(agencyId)
+        const agency = await AgencySchema.findOne({ code: agencyCode })
         if (!agency) {
             return res.status(404).json({
                 message: "Agency not found"
