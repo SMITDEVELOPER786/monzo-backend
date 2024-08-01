@@ -456,7 +456,7 @@ exports.verifyOtp = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+// console.log(password)
     const checkemail = await userScheema.findOne({ email });
 
     if (checkemail) {
@@ -464,7 +464,7 @@ exports.login = async (req, res) => {
 
       if (!checkpassword) {
         return res.status(400).json({
-          message: "password incroect",
+          message: "password incorrect",
         });
       }
       if (!checkemail.isVerify) {
