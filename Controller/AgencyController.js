@@ -261,3 +261,34 @@ exports.deleteAgency = async (req, res) => {
         })
     }
 }
+
+exports.switchAgency = async (req, res) => {
+    try {
+        const { agencyId, userId, switchAgencyId } = req.body;
+        const checkAgency = await AgencySchema.findById(agencyId);
+        const switchAgency = await AgencySchema.findById(switchAgencyId);
+        if (!checkAgency)
+            return res.status(404).json({
+                message: "Agency not found"
+            })
+        if (!switchAgency)
+            return res.status(404).json({
+                message: "Agency to be switched is not found"
+            })
+        if (!checkAgency.joinedUsers.includes(userId))
+            return res.status(404).json({
+                message: "User not found in this agency"
+            })
+        await checkAgency.joinedUsers.includes(userId).save();
+        await switchAgency.joinedUsers.push(userId).save()
+        console.log(switchAgency)
+        return res.status(200).json({
+            message: "user switch to agnecy"
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
