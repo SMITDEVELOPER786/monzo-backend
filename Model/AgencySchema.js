@@ -43,6 +43,24 @@ const agencySchema = new mongoose.Schema({
         ref: "User",
         required: true
     }],
+    joinedUsersRequest: [
+        {
+            userId: {
+                type: Schema.Types.ObjectId,
+                ref: "User",
+                required: true
+            },
+            status: {
+                type: String,
+                enum: ['Pending', 'Approved', 'Rejected'],
+                default: 'Pending'
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
+            }
+        }],
+
     photoId: {
         type: String,
         required: true

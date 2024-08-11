@@ -18,6 +18,7 @@ const upload = multer({ storage: storage });
 
 router.post("/create", upload.fields([{ name: 'agencyImg', maxCount: 1 }, { name: 'passport', maxCount: 1 }, { name: "photoId", maxCount: 1 }]), AgencyController.createAgency);
 
-router.post("/join", AgencyController.joinAgency)
+router.post("/join-request", AgencyController.joinAgencyRequest)
+router.post("/respond-join-request", AgencyController.RespondAgencyJoinRequest)
 
 module.exports = router;

@@ -1,4 +1,5 @@
-const AgencySchema = require("../Model/AgencySchema")
+const AgencySchema = require("../Model/AgencySchema");
+const userSchema = require("../Model/userSchema");
 
 require("dotenv").config();
 const secretkey = process.env.secret_key;
@@ -26,6 +27,11 @@ exports.createAgency = async (req, res) => {
             return res.status(400).json({
                 message: "Agency, passport, or photo ID image not found."
             })
+        if (AgencySchema.findById(req.user._id)) {
+            return res.status(400).json({
+                message: "You already have an Agency"
+            })
+        }
         const agencyImg = await cloudinary.uploader.upload(req?.files?.agencyImg[0].path, {
             folder: "agencyImg"
         });
@@ -64,6 +70,36 @@ exports.getAgency = async (req, res) => {
         return res.status(200).json({
             data
         })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+exports.getUsersInAgency = async (req, res) => {
+    try {
+        const data = await AgencySchema.aggregate([
+            { $match: {} },
+            {
+                $lookup: {
+                    from: "users", // The collection to join with
+                    localField: "joinedUsers", // The field from the agencySchema
+                    foreignField: "_id", // The field from the userSchema
+                    as: "users",
+                }
+            },
+            {
+                $unwind: "$users" // If you want to have one user per document (optional)
+            },
+
+        ])
+
+        return res.status(200).json({
+            data: data,
+            length: data.length
+        })
+
     } catch (err) {
         return res.status(500).json({
             message: err.message
@@ -206,7 +242,7 @@ exports.agencyChngeInfo = async (req, res) => {
     }
 }
 
-exports.joinAgency = async (req, res) => {
+exports.joinAgencyRequest = async (req, res) => {
     try {
         const { agencyCode } = req.body;
         if (!agencyCode) {
@@ -220,16 +256,80 @@ exports.joinAgency = async (req, res) => {
                 message: "Agency not found"
             })
         }
+        if (agency.status === "requested") {
+            return res.status(404).json({
+                message: "Agency is not accepted"
+            })
+        }
+        if (agency.owner === req.user._id) {
+            return res.status(404).json({
+                message: "Owner can't join own agency"
+            })
+        }
         if (agency.joinedUsers.includes(req.user._id)) {
             return res.status(400).json({
                 message: "User already joined agency"
             })
         }
-        agency.joinedUsers.push(req.user._id)
+        if (agency.joinedUsersRequest.some((user) => user.userId.toString() === req.user._id.toString())) {
+            return res.status(400).json({
+                message: "User already requested to join agency"
+            })
+        }
+        agency.joinedUsersRequest.push({ userId: req.user._id })
         await agency.save();
         return res.status(200).json({
-            message: "agency joined successfully"
+            message: "Agency join request sent to Agengy Owner"
         })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+exports.RespondAgencyJoinRequest = async (req, res) => {
+    try {
+        const { agencyCode, status } = req.body;
+        if (!agencyCode || !status) {
+            return res.status(400).json({
+                message: "agencyCode or status not found"
+            })
+        }
+        const agency = await AgencySchema.findOne({ code: agencyCode })
+        if (!agency) {
+            return res.status(404).json({
+                message: "Agency not found"
+            })
+        }
+        const filterUserIndex = agency.joinedUsersRequest.findIndex((user) => user.userId.toString() === req.user._id.toString())
+        console.log("filterUser", filterUserIndex)
+        if (filterUserIndex === -1) {
+            return res.status(400).json({
+                message: "User request not found"
+            })
+        }
+        if (agency.joinedUsersRequest[filterUserIndex].status !== "Pending") {
+            return res.status(400).json({
+                message: "User request already responded"
+            })
+        }
+
+        req.body.status === "Approved" && (agency.joinedUsersRequest[filterUserIndex].status = req.body.status);
+
+        console.log("filterUserIndex", filterUserIndex)
+        req.body.status === "Rejected" && agency.joinedUsersRequest.splice(filterUserIndex, 1);
+
+        req.body.status === "Approved" && agency.joinedUsers.push(req.user._id);
+        console.log(agency)
+
+        await agency.save();
+        // console.log(updateAgency)
+        return res.status(200).json({
+            message: "User request responded successfully"
+        })
+
+
     } catch (err) {
         return res.status(500).json({
             message: err.message
@@ -265,6 +365,28 @@ exports.deleteAgency = async (req, res) => {
 exports.switchAgency = async (req, res) => {
     try {
         const { agencyId, userId, switchAgencyId } = req.body;
+        if (!agencyId) {
+            return res.status(400).json({
+                message: "agency id not found"
+            })
+        }
+        if (!switchAgencyId) {
+            return res.status(400).json({
+                message: "switch agency id not found"
+            })
+        }
+        if (switchAgencyId === agencyId) {
+            return res.status(400).json({
+                message: "Switch agency ID OR agency ID cannot be the same"
+            })
+        }
+        if (!userId) {
+            return res.status(400).json({
+                message: "user id not found"
+            })
+        }
+
+
         const checkAgency = await AgencySchema.findById(agencyId);
         const switchAgency = await AgencySchema.findById(switchAgencyId);
         if (!checkAgency)
@@ -279,9 +401,18 @@ exports.switchAgency = async (req, res) => {
             return res.status(404).json({
                 message: "User not found in this agency"
             })
-        await checkAgency.joinedUsers.includes(userId).save();
-        await switchAgency.joinedUsers.push(userId).save()
-        console.log(switchAgency)
+        // Remove user from the current agency
+        await AgencySchema.updateOne(
+            { _id: agencyId },
+            { $pull: { joinedUsers: userId } }
+        );
+
+        // Add user to the new agency
+        await AgencySchema.updateOne(
+            { _id: switchAgencyId },
+            { $push: { joinedUsers: userId } }
+        );
+        // console.log(switchAgency)
         return res.status(200).json({
             message: "user switch to agnecy"
         })

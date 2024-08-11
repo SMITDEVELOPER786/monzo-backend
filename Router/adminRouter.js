@@ -75,6 +75,7 @@ router.post("/agency/accept", protectAdmin, AgencyController.acceptAgencyReq)
 router.post("/agency/reject", protectAdmin, AgencyController.rejectAgencyReq)
 router.post("/agency/switch", protectAdmin, AgencyController.switchAgency)
 router.get("/agency/get", AgencyController.adminGetAgency)
+router.get("/agency-user", AgencyController.getUsersInAgency)
 router.put("/agency/chngeInfo", protectAdmin, upload.fields([{ name: 'agencyImg', maxCount: 1 }, { name: 'passport', maxCount: 1 }, { name: "photoId", maxCount: 1 }]), AgencyController.agencyChngeInfo)
 router.delete("/agency/delete", protectAdmin, AgencyController.deleteAgency)
 
