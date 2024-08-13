@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const AgencySchema = require("../Model/AgencySchema");
 const userSchema = require("../Model/userSchema");
 
@@ -287,6 +288,63 @@ exports.joinAgencyRequest = async (req, res) => {
         })
     }
 }
+
+exports.getJoinAgencyRequest = async (req, res) => {
+    try {
+        // Find the agency and populate the joinedUsersRequest.userId with name and email from User collection
+        const agency = await AgencySchema.aggregate([
+            {
+                $match: { owner: new mongoose.Types.ObjectId(req.user._id) }
+            },
+            // Lookup to join with User collection
+            {
+                $lookup: {
+                    from: 'users', // The name of the User collection
+                    localField: 'joinedUsersRequest.userId', // Field in Agency to match
+                    foreignField: '_id', // Field in User collection to match
+                    as: 'userDetails' // Alias for the joined data
+                }
+            },
+            // Unwind the userDetails array (if there's more than one user detail per request)
+            {
+                $unwind: {
+                    path: '$userDetails',
+                    preserveNullAndEmptyArrays: true // Keep agency records even if there are no matching users
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    email: 1,
+                    phone: 1,
+                    code: 1,
+                    status: 1,
+                    userEmail: '$userDetails.email',
+                    userId: '$userDetails.Id',
+                    joinedUsersRequest: 1
+                }
+            }
+        ])
+            .exec();
+
+        if (!agency) {
+            return res.status(404).json({
+                message: "Agency not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Requests fetched successfully",
+            agency // The agency document with populated user data
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+};
 
 exports.RespondAgencyJoinRequest = async (req, res) => {
     try {

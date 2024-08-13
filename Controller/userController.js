@@ -102,13 +102,28 @@ exports.signup = async (req, res) => {
       req.body.otp = otp;
       let count = await userScheema.countDocuments().exec();
       console.log(count);
-      const paddedCount = String(count + 1).padStart(6, '0'); // Pad with zeros to ensure 6 digits
-      console.log(paddedCount)
-      const findId = await CustomIdSchema.findOne({ customId: paddedCount }) // is kam ko check krna hai db reset kr k (saim)
-      const findUserId = await userScheema.findOne({ Id: paddedCount }) // is kam ko check krna hai db reset kr k (saim)
-      if (findId) req.body.Id = paddedCount + 1;
-      else req.body.Id = paddedCount;
+      let paddedCount = 0;
+      // let paddedCount = String(count + 1).padStart(6, '0'); // Pad with zeros to ensure 6 digits
+      // console.log(paddedCount)
+      async function checkID(paddedCount) {
 
+        const findId = await CustomIdSchema.find({ customId: String(paddedCount).padStart(6, '0') }) // is kam ko check krna hai db reset kr k (saim)
+        const findUserId = await userScheema.find({ Id: String(paddedCount).padStart(6, '0') }) // is kam ko check krna hai db reset kr k (saim)
+        // console.log(findId)
+        // console.log(findUserId)
+        return { findId, findUserId }
+      }
+      let results;
+      do {
+        // paddedCount = paddedCount.padStart(6, 0) + 1
+        results = await checkID(paddedCount)
+        // console.log("padding count +1", paddedCount)
+        // console.log(results)
+        paddedCount++
+      } while (results.findId.length > 0 || results.findUserId.length > 0);
+
+      req.body.Id = String(paddedCount).padStart(6, '0');
+      // console.log("Final Id:", req.body.Id);
       // const userObj = 
       const user = userScheema(req.body);
 
@@ -176,8 +191,11 @@ exports.socialAuthApi = async (req, res) => {
         checkemail.ProfileId = findProfile
 
       }
-
-
+      const coins = await CoinSchema.findOne({ userId: checkemail._id })
+      console.log(coins)
+      if (coins) {
+        checkemail.coins = coins
+      }
 
       console.log(token);
       return res.status(200).json({
@@ -456,7 +474,7 @@ exports.verifyOtp = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-// console.log(password)
+    // console.log(password)
     const checkemail = await userScheema.findOne({ email });
 
     if (checkemail) {
