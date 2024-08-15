@@ -422,7 +422,7 @@ exports.deleteAgency = async (req, res) => {
 
 exports.switchAgency = async (req, res) => {
     try {
-        const { agencyId, userId, switchAgencyId } = req.body;
+        const { agencyId,  switchAgencyId } = req.body;
         if (!agencyId) {
             return res.status(400).json({
                 message: "agency id not found"
@@ -438,12 +438,6 @@ exports.switchAgency = async (req, res) => {
                 message: "Switch agency ID OR agency ID cannot be the same"
             })
         }
-        if (!userId) {
-            return res.status(400).json({
-                message: "user id not found"
-            })
-        }
-
 
         const checkAgency = await AgencySchema.findById(agencyId);
         const switchAgency = await AgencySchema.findById(switchAgencyId);
@@ -451,28 +445,28 @@ exports.switchAgency = async (req, res) => {
             return res.status(404).json({
                 message: "Agency not found"
             })
+        if (!checkAgency.joinedUsers.includes(req.user._id))
+            return res.status(404).json({
+                message: "User not found in this agency"
+            })
         if (!switchAgency)
             return res.status(404).json({
                 message: "Agency to be switched is not found"
             })
-        if (!checkAgency.joinedUsers.includes(userId))
-            return res.status(404).json({
-                message: "User not found in this agency"
-            })
         // Remove user from the current agency
         await AgencySchema.updateOne(
             { _id: agencyId },
-            { $pull: { joinedUsers: userId } }
+            { $pull: { joinedUsers: req.user._id } }
         );
 
         // Add user to the new agency
         await AgencySchema.updateOne(
             { _id: switchAgencyId },
-            { $push: { joinedUsers: userId } }
+            { $push: { joinedUsers: req.user._id } }
         );
         // console.log(switchAgency)
         return res.status(200).json({
-            message: "user switch to agnecy"
+            message: `user switched to agnecy ${switchAgency.name}`
         })
 
     } catch (err) {
