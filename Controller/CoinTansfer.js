@@ -81,7 +81,7 @@ exports.getCoinsHistory = async (req, res) => {
         //     })
         console.log(req.user)
         const data = await CoinTransferSchema.aggregate([
-            { $match: req.user.role !== "admin" ? { senderId: req.user._id } : {} },
+            { $match: req.user.role !== "admin" && req.user.role !== "subAdmin" ? { senderId: req.user._id } : {} },
             {
                 $lookup: {
                     let: { id: "$senderId" },

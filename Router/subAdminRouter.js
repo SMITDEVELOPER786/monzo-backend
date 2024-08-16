@@ -3,6 +3,8 @@ const router = express.Router()
 const AdminController = require("../Controller/AdminController")
 const userController = require("../Controller/userController.js")
 const { protectSubAdmin } = require("../AuthMiddleware/protect.js")
+const coinRouter = require("./coinRouter.js");
+
 const multer = require("multer")
 
 const storage = multer.diskStorage({
@@ -28,5 +30,9 @@ router.post("/ban-user", protectSubAdmin, userController.banUser);
 router.post("/unban-user", protectSubAdmin, userController.unBanUser);
 router.post("/search-user", protectSubAdmin, AdminController.searchById);
 router.put("/edit-user/:id", protectSubAdmin, upload.single("profileImage"), AdminController.editUserInfo);
+
+router.use("/coins", protectSubAdmin, coinRouter)
+
+
 
 module.exports = router
