@@ -21,5 +21,6 @@ router.post("/create", upload.fields([{ name: 'agencyImg', maxCount: 1 }, { name
 router.post("/join-request", AgencyController.joinAgencyRequest)
 router.get("/join-request/get", AgencyController.getJoinAgencyRequest)
 router.post("/respond-join-request", AgencyController.RespondAgencyJoinRequest)
+router.post("/remove-user", AgencyController.removeUserAgency)
 
 module.exports = router;

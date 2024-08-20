@@ -18,7 +18,9 @@ const protect = asyncHandler(async (req, res, next) => {
 
     const user = await userScheema.findById(verified.userId).select("-password");
     if (!user) {
-      res.status(402);
+      res.status(404).json({
+        message: "User not found"
+      })
       throw new Error("User Not Found");
     }
 

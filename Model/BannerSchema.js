@@ -7,7 +7,7 @@ const bannerSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ["home", "reseller", "event"]
+        enum: ["home", "reseller", "event","user-banner"]
     },
     bannerTitle: {
         type: String,

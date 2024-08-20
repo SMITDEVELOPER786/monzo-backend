@@ -294,7 +294,10 @@ exports.getJoinAgencyRequest = async (req, res) => {
         // Find the agency and populate the joinedUsersRequest.userId with name and email from User collection
         const agency = await AgencySchema.aggregate([
             {
-                $match: { owner: new mongoose.Types.ObjectId(req.user._id) }
+                $match: {
+                    owner: new mongoose.Types.ObjectId("666098919f53278e47ece745")
+                    // owner: new mongoose.Types.ObjectId(req.user._id) 
+                }
             },
             // Lookup to join with User collection
             {
@@ -305,13 +308,6 @@ exports.getJoinAgencyRequest = async (req, res) => {
                     as: 'userDetails' // Alias for the joined data
                 }
             },
-            // Unwind the userDetails array (if there's more than one user detail per request)
-            {
-                $unwind: {
-                    path: '$userDetails',
-                    preserveNullAndEmptyArrays: true // Keep agency records even if there are no matching users
-                }
-            },
             {
                 $project: {
                     _id: 1,
@@ -320,15 +316,65 @@ exports.getJoinAgencyRequest = async (req, res) => {
                     phone: 1,
                     code: 1,
                     status: 1,
-                    userEmail: '$userDetails.email',
-                    userId: '$userDetails.Id',
-                    joinedUsersRequest: 1
+                    // userEmail: '$userDetails.email',
+                    // userId: '$userDetails.Id',
+                    joinedUsersRequest: {
+                        $map: {
+                            input: "$joinedUsersRequest",
+                            as: "request",
+                            in: {
+                                _id: "$$request._id",
+                                userId: "$$request.userId",
+                                status: "$$request.status",
+                                createdAt: "$$request.createdAt",
+                                userDetails: {
+                                    $arrayElemAt: [
+                                        {
+                                            $filter: {
+                                                input: "$userDetails",
+                                                as: "userDetail",
+                                                cond: {
+                                                    $eq: ["$$userDetail._id", "$$request.userId"]
+                                                }
+
+                                            }
+                                        },
+                                        0
+                                    ]
+                                }
+                            }
+
+                        }
+                    },
+                }
+            }, {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    email: 1,
+                    phone: 1,
+                    code: 1,
+                    status: 1,
+                    joinedUsersRequest: {
+                        $map: {
+                            input: "$joinedUsersRequest",
+                            as: "request",
+                            in: {
+                                _id: "$$request._id",
+                                userId: "$$request.userId",
+                                status: "$$request.status",
+                                createdAt: "$$request.createdAt",
+                                Id: "$$request.userDetails.Id",
+                                userEmail: "$$request.userDetails.email"
+                            }
+                        }
+                    }
                 }
             }
         ])
-            .exec();
 
-        if (!agency) {
+        // console.log(agency.length)
+        if (agency.length === 0) {
             return res.status(404).json({
                 message: "Agency not found"
             });
@@ -336,7 +382,7 @@ exports.getJoinAgencyRequest = async (req, res) => {
 
         return res.status(200).json({
             message: "Requests fetched successfully",
-            agency // The agency document with populated user data
+            data: agency // The agency document with populated user data
         });
 
     } catch (err) {
@@ -348,7 +394,7 @@ exports.getJoinAgencyRequest = async (req, res) => {
 
 exports.RespondAgencyJoinRequest = async (req, res) => {
     try {
-        const { agencyCode, status } = req.body;
+        const { agencyCode, status, userId } = req.body;
         if (!agencyCode || !status) {
             return res.status(400).json({
                 message: "agencyCode or status not found"
@@ -360,6 +406,12 @@ exports.RespondAgencyJoinRequest = async (req, res) => {
                 message: "Agency not found"
             })
         }
+        // if (agency.owner.toString() !== req.user._id.toString()) {
+        //     return res.status(400).json({
+        //         message: "You are not owner to agency"
+        //     })
+        // }
+
         const filterUserIndex = agency.joinedUsersRequest.findIndex((user) => user.userId.toString() === req.user._id.toString())
         console.log("filterUser", filterUserIndex)
         if (filterUserIndex === -1) {
@@ -395,6 +447,50 @@ exports.RespondAgencyJoinRequest = async (req, res) => {
     }
 }
 
+exports.removeUserAgency = async (req, res) => {
+    try {
+        const { userId, agencyCode } = req.body;
+        if (!userId || !agencyCode) {
+            return res.status(400).json({
+                message: "User Id or Agency Code not found"
+            })
+        }
+        const checkAgency = await AgencySchema.findOne({ code: agencyCode });
+        if (!checkAgency) {
+            return res.status(404).json({
+                message: "Agency not found"
+            })
+        }
+        const user = await userSchema.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+        if (!checkAgency.joinedUsers.includes(userId)) {
+            return res.status(400).json({
+                message: "User is not present in agency"
+            })
+        }
+        console.log(userId)
+        await AgencySchema.findOneAndUpdate({ _id: checkAgency._id },
+            {
+                $pull: {
+                    joinedUsers: userId,
+                    joinedUsersRequest: { userId }
+
+                }
+            });
+        return res.status(200).json({
+            message: "User removed successfully"
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
 exports.deleteAgency = async (req, res) => {
     try {
         const { agencyId } = req.body;
@@ -422,7 +518,7 @@ exports.deleteAgency = async (req, res) => {
 
 exports.switchAgency = async (req, res) => {
     try {
-        const { agencyId,  switchAgencyId } = req.body;
+        const { agencyId, switchAgencyId } = req.body;
         if (!agencyId) {
             return res.status(400).json({
                 message: "agency id not found"
