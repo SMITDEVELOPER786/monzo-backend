@@ -71,7 +71,13 @@ const userSchema = new mongoose.Schema({
   },
   coins: {
     type: mongoose.Schema.Types.ObjectId, ref: "coins"
-  }
+  },
+  currentXp: {
+    type: Number
+  },
+  totalXp: {
+    type: Number
+  },
 
 })
 

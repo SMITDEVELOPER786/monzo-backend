@@ -522,7 +522,7 @@ exports.login = async (req, res) => {
       }
     } else {
       return res.status(400).json({
-        message: "user not fount",
+        message: "user not found",
       });
     }
   } catch (e) {
@@ -1184,6 +1184,8 @@ exports.SearchUser = async (req, res) => {
           gender: { $arrayElemAt: ["$UserProf.gender", 0] },
           // isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
           Id: { $arrayElemAt: ["$User.Id", 0] },
+          currentXp: { $arrayElemAt: ["$User.currentXp", 0] },
+          totalXp: { $arrayElemAt: ["$User.totalXp", 0] },
         }
       }
     ]);
