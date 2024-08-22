@@ -15,10 +15,10 @@ cloudinary.config({
 exports.createAgency = async (req, res) => {
     try {
         const { idCard, phone, email, name } = req.body
-        console.log("passport", req.files.passport)
-        console.log("agencyImg", req.files.agencyImg)
-        console.log("req.file", req.files)
-        console.log("req.file", req.file)
+        // console.log("passport", req.files.passport)
+        // console.log("agencyImg", req.files.agencyImg)
+        // console.log("req.file", req.files)
+        // console.log("req.file", req.file)
         if (!idCard || !phone || !req.files || !email || !name) {
             return res.status(400).json({
                 message: "idCard, phone, agencyImg, email, name are required"
@@ -28,7 +28,12 @@ exports.createAgency = async (req, res) => {
             return res.status(400).json({
                 message: "Agency, passport, or photo ID image not found."
             })
-        if (AgencySchema.findById(req.user._id)) {
+        if (!userSchema.findById(req.user._id)) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+        if (AgencySchema.findById({ owner: req.user._id })) {
             return res.status(400).json({
                 message: "You already have an Agency"
             })
