@@ -19,6 +19,7 @@ const LevelIconController = require("../Controller/LevelIconController.js")
 
 const multer = require("multer");
 const GuardianController = require("../Controller/GuardianController.js");
+const { getAllCoinDistributors, deleteCoinDistributor } = require("../Controller/CoinDistributorController.js");
 
 
 const storage = multer.diskStorage({
@@ -94,6 +95,10 @@ router.delete("/special-tag/delete", protectAdmin, TagController.deleteAssignSpe
 
 router.put("/change/userInfo", protectAdmin, upload.single("profileImage"), AdminController.changeInfoForm)
 
+// ----------- coin distributors
+router.post("/coin-distributor/create", protectAdmin, AdminController.signup)
+router.get("/coin-distributor/", protectAdmin, getAllCoinDistributors)
+router.delete("/coin-distributor/delete", protectAdmin, deleteCoinDistributor)
 
 
 

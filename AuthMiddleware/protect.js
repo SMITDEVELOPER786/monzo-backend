@@ -37,7 +37,7 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Not authorized, no token' });
+      return res.status(404).json({ message: 'Not authorized, token not found' });
     }
 
     const token = authHeader.split(' ')[1];
@@ -101,9 +101,44 @@ const protectSubAdmin = asyncHandler(async (req, res, next) => {
   }
 })
 
+const protectCoinDistributor = asyncHandler(async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(404).json({ message: 'Not authorized, no token' });
+    }
+    const token = authHeader.split(" ")[1]
+    if (!token) {
+      return res.status(401).json({ message: 'Not authorized, token missing' });
+    }
+    let decoded;
+    try {
+      decoded = await jwt.verify(token, process.env.secret_key);
+    } catch (err) {
+      // console.log("decoded", decoded)
+      return res.status(401).json({ message: 'Sorry, token expired' });
+    }
+    const user = await AdminSchema.findById(decoded.userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Coin Distributor not found' });
+    }
+    if (user.role !== 'coin-distributor') {
+      return res.status(403).json({ message: 'You are not an Coin Distributor. Please log in as an Coin Distributor.' });
+    }
+
+    req.user = user;
+    next();
+
+  } catch (err) {
+    return res.status(500).json({ message: err.message })
+  }
+})
+
 
 module.exports = {
   protect,
   protectAdmin,
-  protectSubAdmin
+  protectSubAdmin,
+  protectCoinDistributor
 };

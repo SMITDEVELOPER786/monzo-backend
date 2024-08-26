@@ -129,11 +129,15 @@ exports.loginAdmin = async (req, res) => {
 // };
 // Signup only for SubAdmin
 exports.signup = async (req, res) => {
-    const { email, password, } = req.body;
+    const { email, password, role } = req.body;
 
     try {
         await userValidate.validateAsync(req.body);
-
+        if (!role) {
+            return res.status(400).json({
+                message: "role not found"
+            })
+        }
         const checkemail = await AdminSchema.findOne({ email });
         if (checkemail) {
             return res.status(401).json({
@@ -148,7 +152,7 @@ exports.signup = async (req, res) => {
             req.body.password = hashpassword;
 
             req.body.otp = otp;
-            req.body.role = "subAdmin"
+            // req.body.role = "subAdmin"
 
             // const userObj = 
             const user = AdminSchema(req.body);
@@ -166,7 +170,7 @@ exports.signup = async (req, res) => {
                 message: "User Created",
                 data: user,
                 token,
-                otp,
+                // otp,
             });
         }
     } catch (e) {

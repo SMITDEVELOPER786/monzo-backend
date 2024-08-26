@@ -10,6 +10,7 @@ const { unfollow, follow, getListFollowValidationRules } = require("../Controlle
 const { LiveStreamController } = require("../Controller/LiveStreamController.js")
 const adminRouter = require("./adminRouter.js")
 const subAdminRouter = require("./subAdminRouter.js")
+const coinDistributorRouter = require("./coinDistributorRouter.js")
 const agencyRouter = require("./agencyRouter.js");
 const BannerController = require("../Controller/BannerController")
 const GuardianController = require("../Controller/GuardianController")
@@ -79,6 +80,7 @@ router.use("/agency", protect, agencyRouter);
 // for admin
 router.use("/admin", adminRouter)
 router.use("/sub-admin", subAdminRouter)
+router.use("/coin-distributor", coinDistributorRouter)
 
 
 
