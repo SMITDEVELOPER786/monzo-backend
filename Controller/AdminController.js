@@ -7,6 +7,7 @@ const userSchema = require("../Model/userSchema.js");
 const UserProfileSchema = require("../Model/UserProfileSchema.js");
 const bgImgSchema = require("../Model/bgImgSchema.js");
 const SubAdminActivitySchema = require("../Model/SubAdminActivitySchema.js");
+const DistributorCoinSchema = require("../Model/DistributorCoinSchema.js")
 require("dotenv").config();
 const secretkey = process.env.secret_key;
 
@@ -51,6 +52,20 @@ exports.loginAdmin = async (req, res) => {
             const token = jwt.sign({ userId: checkemail._id }, secretkey, {
                 expiresIn: "24h",
             });
+            if (checkemail.role === "coin-distributor") {
+                const coins = await DistributorCoinSchema.findOne({ distributorId: checkemail._id });
+                // res.body.coins = { coins };
+                const response = {
+                    ...checkemail._doc,
+                    coins: coins ? coins.coins : 0
+                };
+                return res.status(200).json({
+                    message: "login Successfully ",
+                    data: response,
+                    token: token,
+                });
+
+            }
 
             console.log(token);
             return res.status(200).json({
@@ -139,8 +154,9 @@ exports.signup = async (req, res) => {
             })
         }
         const checkemail = await AdminSchema.findOne({ email });
-        if (checkemail) {
-            return res.status(401).json({
+        const checkemailUser = await userSchema.findOne({ email });
+        if (checkemail || checkemailUser) {
+            return res.status(400).json({
                 message: "User AlReady Register",
             });
         } else {
@@ -593,5 +609,47 @@ exports.getSubAdminActivity = async (req, res) => {
             message: "Internal Server error",
             error: e.message,
         });
+    }
+}
+
+exports.sendCoinstoDistributor = async (req, res) => {
+    try {
+        const { coins, distributorId } = req.body;
+        if (!coins) {
+            return res.status(400).json({
+                message: "Coin not found"
+            })
+        }
+        if (!distributorId) {
+            return res.status(400).json({
+                message: "Distributor Id not found"
+            })
+        }
+        const user = await AdminSchema.findById(distributorId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+        const checkHistory = await DistributorCoinSchema.findOne({ distributorId })
+        if (checkHistory.coins) {
+            checkHistory.coins += parseInt(coins)
+            checkHistory.save();
+            return res.status(200).json({
+                message: `${coins} has been transfered to Distributor`,
+                status: true
+            })
+        }
+        req.body.coins = parseInt(coins);
+        DistributorCoinSchema(req.body).save();
+        return res.status(200).json({
+            message: `${coins} has been transfered to Distributor`,
+            status: true
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
     }
 }

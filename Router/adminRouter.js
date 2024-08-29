@@ -99,6 +99,7 @@ router.put("/change/userInfo", protectAdmin, upload.single("profileImage"), Admi
 router.post("/coin-distributor/create", protectAdmin, AdminController.signup)
 router.get("/coin-distributor/", protectAdmin, getAllCoinDistributors)
 router.delete("/coin-distributor/delete", protectAdmin, deleteCoinDistributor)
+router.post("/coin-distributor/send-coin", protectAdmin, AdminController.sendCoinstoDistributor)
 
 
 

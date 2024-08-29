@@ -4,9 +4,57 @@ const CoinSchema = require("../Model/CoinSchema");
 const AdminSchema = require("../Model/AdminSchema");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const DistributorCoinSchema = require("../Model/DistributorCoinSchema");
 require("dotenv").config();
 
 const secretkey = process.env.secret_key;
+
+exports.TransferCoins = async (req, res) => {
+    try {
+        const { coins, userId } = req.body;
+        if (!coins) {
+            return res.status(400).json({
+                message: "Coin not found"
+            })
+        }
+        if (!userId) {
+            return res.status(400).json({
+                message: "UserId not found"
+            })
+        }
+        const user = await userSchema.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+        const distributor = await DistributorCoinSchema.findOne({ distributorId: req.user.id })
+        const checkHistory = await CoinSchema.findOne({ userId })
+        distributor.coins -= parseInt(coins)
+        await distributor.save();
+        if (checkHistory) {
+            checkHistory.coins += parseInt(coins)
+            checkHistory.save();
+
+            return res.status(200).json({
+                message: `${coins} has been transfered to ${user.Id}`,
+                status: true
+            });
+        }
+        req.body.resellerId = user.Id;
+        await CoinSchema(req.body).save();
+
+        return res.status(200).json({
+            message: `${coins} has been transfered to ${user.Id}`,
+            status: true
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
 
 
 exports.loginCoinDistributor = async (req, res) => {
@@ -45,6 +93,12 @@ exports.loginCoinDistributor = async (req, res) => {
     }
 }
 
+exports.getMyAmout = async (req, res) => {
+    const coins = await DistributorCoinSchema.findOne({ distributorId: req.user.id })
+    return res.status(200).json({
+        data: coins.coins
+    })
+}
 
 exports.getAllCoinDistributors = async (req, res) => {
     try {
@@ -61,13 +115,13 @@ exports.getAllCoinDistributors = async (req, res) => {
 
 exports.deleteCoinDistributor = async (req, res) => {
     try {
-        const { email } = req.body;
-        if (!email) {
+        const { distributorId } = req.body;
+        if (!distributorId) {
             return res.status(400).json({
-                message: "Email is required"
+                message: "Distributor ID is required"
             })
         }
-        const checkEmail = await AdminSchema.findOneAndDelete({ email });
+        const checkEmail = await AdminSchema.findByIdAndDelete(distributorId);
         if (!checkEmail) {
             return res.status(404).json({
                 message: "Coin Distributor not found"
@@ -84,44 +138,3 @@ exports.deleteCoinDistributor = async (req, res) => {
     }
 }
 
-exports.TransferCoins = async (req, res) => {
-    try {
-        const { coins, userId } = req.body;
-        if (!coins) {
-            return res.status(400).json({
-                message: "Coin not found"
-            })
-        }
-        if (!userId) {
-            return res.status(400).json({
-                message: "UserId not found"
-            })
-        }
-        const user = await userSchema.findById(userId);
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            })
-        }
-        const checkHistory = await CoinSchema.findOne({ userId })
-        if (checkHistory) {
-            checkHistory.coins += coins
-            checkHistory.save();
-            return res.status(200).json({
-                message: `${coins} has been transfered to ${user.Id}`,
-                status: true
-            })
-        }
-        req.body.resellerId = user.Id;
-        CoinSchema(req.body).save();
-        return res.status(200).json({
-            message: `${coins} has been transfered to ${user.Id}`,
-            status: true
-        })
-
-    } catch (err) {
-        return res.status(500).json({
-            message: err.message
-        })
-    }
-}

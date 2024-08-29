@@ -53,7 +53,7 @@ router.post('/change-password', protect, userController.PasswordOtpVerify);
 
 
 router.get("/myprofile", protect, userController.Myprofile)
-router.get("/get-all-user", protectAdmin, userController.getAllUser)
+router.get("/get-all-user",  userController.getAllUser)
 router.post("/follow", protect, follow)
 router.post("/unfollow", protect, unfollow)
 router.get("/getfollowing", protect, getListFollowValidationRules)
