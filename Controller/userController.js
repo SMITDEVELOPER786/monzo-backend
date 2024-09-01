@@ -102,9 +102,9 @@ exports.signup = async (req, res) => {
       req.body.otp = otp;
       let count = await userScheema.countDocuments().exec();
       console.log(count);
-      let paddedCount = 0;
       // let paddedCount = String(count + 1).padStart(6, '0'); // Pad with zeros to ensure 6 digits
       // console.log(paddedCount)
+      let paddedCount = 0;
       async function checkID(paddedCount) {
 
         const findId = await CustomIdSchema.find({ customId: String(paddedCount).padStart(6, '0') }) // is kam ko check krna hai db reset kr k (saim)
@@ -116,10 +116,10 @@ exports.signup = async (req, res) => {
       let results;
       do {
         // paddedCount = paddedCount.padStart(6, 0) + 1
+        paddedCount++
         results = await checkID(paddedCount)
         // console.log("padding count +1", paddedCount)
         // console.log(results)
-        paddedCount++
       } while (results.findId.length > 0 || results.findUserId.length > 0);
 
       req.body.Id = String(paddedCount).padStart(6, '0');
@@ -1124,74 +1124,40 @@ exports.getAllUser = async (req, res) => {
 //SearchUser
 exports.SearchUser = async (req, res) => {
   try {
-    const { name } = req.body; // Assuming query parameter name is used
+    const { name } = req.body;
 
-    console.log(name);
-    // const data = await userprofileSchema.find({
-    //   $or: [
-    //     {
-    //       username: {
-    //         $regex: new RegExp(name, "i"), // Case-insensitive search
-    //       },
-    //     },
-    //   ],
-    // });
+    console.log(name); // Check the name value
 
-
-    var data = await userSchema.aggregate([
+    const data = await userprofileSchema.aggregate([
       {
-        $match: {}
-      },
-      {
-        $lookup: {
-          from: "users",
-          let: { id: "$_id" },
-          pipeline: [{
-            $match: {
-              $expr: {
-                $and: { $eq: ["$_id", "$$id"] }
-              }
-            }
+        $match: {
+          username: {
+            $regex: new RegExp(name, "i"), // Case-insensitive search
           },
-          ],
-          as: "User"
         }
       },
       {
         $lookup: {
-          from: "userprofiles",
-          let: { id: "$_id" },
-          pipeline: [{
-            $match: {
-              $expr: {
-                $and: { $eq: ["$authId", "$$id"] }
-              }
-            }
-          },
-          ],
+          from: "userprofiles", // Check if this is the correct collection name
+          localField: "_id",
+          foreignField: "authId",
           as: "UserProf"
         }
       },
       {
+        $unwind: "$UserProf" // Flatten UserProf array if you expect a one-to-one relationship
+      },
+      {
         $project: {
-          isBan: { $arrayElemAt: ["$User.isBan", 0] },
-          isReseller: { $arrayElemAt: ["$User.isReseller", 0] },
-          banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
-          isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
-          username: { $arrayElemAt: ["$UserProf.username", 0] },
-          dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
-          profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
-          gender: { $arrayElemAt: ["$UserProf.gender", 0] },
-          // isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
-          Id: { $arrayElemAt: ["$User.Id", 0] },
-          currentXp: { $arrayElemAt: ["$User.currentXp", 0] },
-          totalXp: { $arrayElemAt: ["$User.totalXp", 0] },
+          username: 1, // Show the fields you want to check
+          "UserProf.banDuration": 1,
+          "UserProf.username": 1,
+          // Add other fields as needed
         }
       }
     ]);
 
-
-    // console.log(data);
+    console.log(data); // See what data is returned
     return res.status(200).json({
       data,
       length: data.length
@@ -1221,7 +1187,6 @@ exports.searchByID = async (req, res) => {
             // You can add more conditions here for the aggregation pipeline
           ],
         }
-
       },
       {
         $lookup: {
@@ -1270,7 +1235,8 @@ exports.searchByID = async (req, res) => {
     ]);
 
     return res.status(200).json({
-      data
+      data,
+      length: data.length
     })
 
   } catch (error) {
