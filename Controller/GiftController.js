@@ -107,7 +107,7 @@ exports.sendGift = async (req, res) => {
         senderCoins.coins -= parseInt(gift.giftValue);
         senderUser.isLevel += 5;
         recvUser.isLevel += 3;
-        await senderUser.save(), recvUser.save()  , senderCoins.save();
+        await senderUser.save(), recvUser.save(), senderCoins.save();
         gift.senderId.push(req.user._id);
         gift.recieverId.push(recieverId);
 
@@ -116,10 +116,10 @@ exports.sendGift = async (req, res) => {
         await gift.save();
 
         return res.status(200).json({
-            message: "Gift sent succesfully"
+            message: "Gift sent succesfully",
+            data: { giftImg: gift.giftImg }
         })
-        // if()
-        // console.log(checkUser)
+
     } catch (err) {
         return res.status(500).json({
             message: err.message

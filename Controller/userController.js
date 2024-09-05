@@ -1126,7 +1126,7 @@ exports.SearchUser = async (req, res) => {
   try {
     const { name } = req.body;
 
-    console.log(name); // Check the name value
+    // console.log(name); // Check the name value
 
     const data = await userprofileSchema.aggregate([
       {
@@ -1137,27 +1137,17 @@ exports.SearchUser = async (req, res) => {
         }
       },
       {
-        $lookup: {
-          from: "userprofiles", // Check if this is the correct collection name
-          localField: "_id",
-          foreignField: "authId",
-          as: "UserProf"
-        }
-      },
-      {
-        $unwind: "$UserProf" // Flatten UserProf array if you expect a one-to-one relationship
-      },
-      {
         $project: {
           username: 1, // Show the fields you want to check
-          "UserProf.banDuration": 1,
-          "UserProf.username": 1,
+          
+          // "UserProf.banDuration": 1,
+          // "UserProf.username": 1,
           // Add other fields as needed
         }
       }
     ]);
 
-    console.log(data); // See what data is returned
+    // console.log(data); // See what data is returned
     return res.status(200).json({
       data,
       length: data.length

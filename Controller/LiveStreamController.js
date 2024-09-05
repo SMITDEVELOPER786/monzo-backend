@@ -1,3 +1,4 @@
+const CoinSchema = require("../Model/CoinSchema");
 const LiveStreamSchema = require("../Model/LiveStreamSchema");
 const UserProfileSchema = require("../Model/UserProfileSchema");
 const userSchema = require("../Model/userSchema");
@@ -99,7 +100,7 @@ exports.CreateLiveStreamController = async (req, res) => {
         const liveStreamData = {
             hostName: user.username,
             hostId: req.user._id,
-            hostImage:user.profileImage,
+            hostImage: user.profileImage,
             streamType,
             title,
             scheduleTime,
@@ -178,10 +179,17 @@ exports.joinLiveStream = async (req, res) => {
         if (findStream.userId.includes(req.user._id))
             return res.status(404).json({ message: "stream already joined" })
         findStream.userId.push(req.user._id);
-        await findStream.save()
+
+        const { username, profileImage } = await UserProfileSchema.findOne({ authId: req.user._id })
+        const { coins } = await CoinSchema.findOne({ userId: req.user._id })
+        const { isLevel } = await userSchema.findById(req.user._id)
+        // console.log(username)
+
+        const user = { username, profileImage, coins, isLevel }
+        await findStream.save();
         return res.status(200).json({
             message: "stream joined Successfully...!",
-            data: findStream
+            data: { findStream, user }
         })
 
     } catch (err) {
@@ -224,7 +232,7 @@ exports.EndLiveStream = async (req, res) => {
 exports.getPopularStreams = async (req, res) => {
     try {
         const user = await userSchema.findById({ _id: req.user.id });
-        
+
         const data = await getStreamFunc();
         const popularStream = data.filter((stream) => stream.country === user.country);
         // console.log(popularStream)
