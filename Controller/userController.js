@@ -1139,7 +1139,7 @@ exports.SearchUser = async (req, res) => {
       {
         $project: {
           username: 1, // Show the fields you want to check
-          
+
           // "UserProf.banDuration": 1,
           // "UserProf.username": 1,
           // Add other fields as needed
@@ -1209,16 +1209,23 @@ exports.searchByID = async (req, res) => {
         }
       },
       {
+        $unwind: "$UserProf",
+        $unwind: "$User",
+      },
+      {
         $project: {
           isBan: { $arrayElemAt: ["$UserProf.isBan", 0] },
           banDuration: { $arrayElemAt: ["$UserProf.banDuration", 0] },
-          isLevel: { $arrayElemAt: ["$User.isLevel", 0] },
           username: { $arrayElemAt: ["$UserProf.username", 0] },
           dateOfBirth: { $arrayElemAt: ["$UserProf.dateOfBirth", 0] },
           profileImage: { $arrayElemAt: ["$UserProf.profileImage", 0] },
           gender: { $arrayElemAt: ["$UserProf.gender", 0] },
           isBlocked: { $arrayElemAt: ["$UserProf.isBlocked", 0] },
-          Id: { $arrayElemAt: ["$User.Id", 0] },
+          followers: { $arrayElemAt: ["$UserProf.followers", 0] },
+          following: { $arrayElemAt: ["$UserProf.following", 0] },
+          // Id: { $arrayElemAt: ["$User.Id", 0] },
+          UserProf: "$UserProf",
+          User: "$User"
           // username: { $arrayElemAt: ["$UserProf.username", 0] },
         }
       }
